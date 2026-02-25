@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saisurya Pagidimarri — Automation & Controls Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--bg2:#0c0e13;--bg3:#111520;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--amber:#f97316;--amber-d:#c2570e;--amber-l:#fdba74;--cyan:#22d3ee;--green:#4ade80;--red:#f87171;--text:#f0f4f8;--text2:#94a3b8;--text3:#475569;--display:'Barlow Condensed',sans-serif;--body:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;--r:4px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(249,115,22,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(7,8,11,0.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--display);font-size:1.1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.nav-logo .dot{width:6px;height:6px;background:var(--amber);border-radius:50%;box-shadow:0 0 8px var(--amber);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--amber)}50%{opacity:.5;box-shadow:0 0 3px var(--amber)}}
+.nav-links{display:flex;align-items:center;gap:.15rem;list-style:none}
+.nav-links a{font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);padding:.4rem .75rem;border:1px solid transparent;transition:all .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--amber);border-color:rgba(249,115,22,.3);background:rgba(249,115,22,.05)}
+.nav-cta{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem 1rem;background:var(--amber);color:var(--bg);font-weight:700;transition:background .2s}
+.nav-cta:hover{background:var(--amber-l)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text2);transition:all .3s}
+
+/* LAYOUT */
+.section{position:relative;z-index:1}
+.container{max-width:1140px;margin:0 auto;padding:0 2rem}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden}
+.circuit-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.circuit-lines::before,.circuit-lines::after{content:'';position:absolute;background:var(--amber);opacity:.1}
+.circuit-lines::before{width:1px;height:60%;right:28%;top:20%;animation:lg 3s ease-in-out infinite alternate}
+.circuit-lines::after{height:1px;width:40%;right:0;top:42%;animation:lg2 4s ease-in-out infinite alternate}
+@keyframes lg{from{height:20%;opacity:.05}to{height:60%;opacity:.14}}
+@keyframes lg2{from{width:15%;opacity:.05}to{width:40%;opacity:.14}}
+#hero::before{content:'';position:absolute;left:-20%;top:10%;width:700px;height:700px;background:radial-gradient(circle,rgba(249,115,22,.07) 0%,transparent 65%);pointer-events:none}
+.hero-content{max-width:780px}
+.hero-status{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);border:1px solid var(--border2);padding:.35rem .9rem;margin-bottom:2rem;background:var(--bg2);animation:fadeUp .6s ease both}
+.status-dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.hero-eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;animation:fadeUp .6s .1s ease both}
+.hero-name{font-family:var(--display);font-size:clamp(3.8rem,10vw,8.5rem);font-weight:900;line-height:.9;letter-spacing:-.01em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .6s .15s ease both}
+.hero-name .outline{color:transparent;-webkit-text-stroke:1.5px var(--amber);display:block}
+.hero-title{font-family:var(--display);font-size:clamp(1.2rem,3vw,1.9rem);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:2rem;animation:fadeUp .6s .2s ease both}
+.hero-desc{font-size:.97rem;color:var(--text2);max-width:560px;line-height:1.85;margin-bottom:2.5rem;animation:fadeUp .6s .25s ease both}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:3rem;animation:fadeUp .6s .3s ease both}
+.btn-primary{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:.75rem 1.75rem;background:var(--amber);color:var(--bg);border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
+.btn-primary:hover{background:var(--amber-l);transform:translateY(-1px)}
+.btn-outline{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;padding:.75rem 1.75rem;background:transparent;color:var(--text2);border:1px solid var(--border2);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber)}
+.hero-quick-stats{display:flex;flex-wrap:wrap;gap:2rem;animation:fadeUp .6s .35s ease both}
+.quick-stat{display:flex;flex-direction:column}
+.quick-stat .val{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--amber);line-height:1}
+.quick-stat .lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-top:.2rem}
+
+/* TICKER */
+.metrics-ticker{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.5rem 0;overflow:hidden;position:relative;z-index:1}
+.ticker-track{display:flex;gap:0;animation:ticker 28s linear infinite;width:max-content}
+.ticker-item{display:flex;align-items:center;gap:1rem;padding:0 2.5rem;border-right:1px solid var(--border);white-space:nowrap}
+.ticker-item .t-val{font-family:var(--display);font-size:1.5rem;font-weight:800;color:var(--amber)}
+.ticker-item .t-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION CHROME */
+.sec-header{margin-bottom:3rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+.sec-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem}
+.sec-title{font-family:var(--display);font-size:clamp(2.2rem,5vw,4rem);font-weight:800;text-transform:uppercase;letter-spacing:-.01em;line-height:1}
+.sec-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border2),transparent);min-width:40px;align-self:center;margin-bottom:.3rem}
+
+/* ABOUT */
+#about{padding:100px 0}
+.about-grid{display:grid;grid-template-columns:1fr 360px;gap:5rem;align-items:start}
+.about-body p{color:var(--text2);line-height:1.85;font-size:.97rem;margin-bottom:1.25rem}
+.about-body p strong{color:var(--text);font-weight:600}
+.about-highlights{display:flex;flex-direction:column;gap:.9rem;margin-top:2rem}
+.highlight-item{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.25rem;border:1px solid var(--border);background:var(--bg2);transition:border-color .2s}
+.highlight-item:hover{border-color:rgba(249,115,22,.3)}
+.h-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
+.h-text{font-family:var(--mono);font-size:.7rem;color:var(--text2);line-height:1.65}
+.h-text strong{color:var(--amber);display:block;margin-bottom:.2rem;font-size:.73rem}
+.about-sidebar{display:flex;flex-direction:column;gap:1.5rem}
+.sidebar-card{border:1px solid var(--border);background:var(--bg2);padding:1.5rem}
+.sidebar-card-title{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.sidebar-stat-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.sidebar-stat-row:last-child{border-bottom:none}
+.stat-name{font-family:var(--mono);font-size:.63rem;color:var(--text2)}
+.stat-val{font-family:var(--mono);font-size:.63rem;color:var(--text);font-weight:700}
+.stat-val.good{color:var(--green)}
+.cert-list{display:flex;flex-direction:column;gap:.75rem}
+.cert-item{display:flex;align-items:center;gap:.75rem;font-family:var(--mono);font-size:.65rem;color:var(--text2);line-height:1.5}
+.cert-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cert-dot.live{background:var(--green);box-shadow:0 0 6px var(--green)}
+.cert-dot.pending{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulse 2s infinite}
+
+/* EXPERTISE */
+#expertise{padding:100px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.exp-card{background:var(--bg2);padding:2rem;transition:background .3s;position:relative;overflow:hidden;cursor:default}
+.exp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.exp-card:hover{background:var(--bg3)}
+.exp-card:hover::before{transform:scaleX(1)}
+.exp-icon{font-size:1.75rem;margin-bottom:1.25rem;display:block}
+.exp-title{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem;color:var(--text)}
+.exp-body{font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:1.25rem}
+.exp-tags{display:flex;flex-wrap:wrap;gap:.35rem}
+.etag{font-family:var(--mono);font-size:.57rem;letter-spacing:.05em;padding:.2rem .5rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--text3);transition:all .2s}
+.exp-card:hover .etag{border-color:rgba(249,115,22,.25);color:var(--amber-l)}
+
+/* PROJECTS */
+#projects{padding:100px 0}
+.projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.projects-grid .proj-featured{grid-column:1/-1}
+.proj-card{border:1px solid var(--border);background:var(--bg2);overflow:hidden;cursor:pointer;transition:border-color .3s,transform .3s;position:relative}
+.proj-card:hover{border-color:rgba(249,115,22,.4);transform:translateY(-2px)}
+.proj-card-inner{padding:2rem}
+.proj-featured .proj-card-inner{display:grid;grid-template-columns:1fr 240px;gap:3rem;align-items:center}
+.proj-num{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:.75rem}
+.proj-title{font-family:var(--display);font-size:1.45rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.6rem;color:var(--text);line-height:1.15}
+.proj-featured .proj-title{font-size:2rem}
+.proj-desc{font-size:.83rem;color:var(--text2);line-height:1.7;margin-bottom:1.25rem}
+.proj-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1.25rem}
+.ptag{font-family:var(--mono);font-size:.57rem;padding:.2rem .55rem;border:1px solid var(--border2);color:var(--text3);letter-spacing:.05em}
+.proj-metrics{display:flex;flex-wrap:wrap;gap:.5rem}
+.pmetric{font-family:var(--mono);font-size:.6rem;padding:.3rem .7rem;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.2);color:var(--amber-l)}
+.proj-arrow{font-family:var(--mono);font-size:.63rem;color:var(--amber);display:flex;align-items:center;gap:.4rem;margin-top:1.25rem;opacity:0;transition:opacity .2s,gap .2s}
+.proj-card:hover .proj-arrow{opacity:1;gap:.7rem}
+.proj-featured-stats{display:flex;flex-direction:column;gap:.75rem}
+.feat-stat{padding:.9rem 1.1rem;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;gap:.9rem}
+.feat-stat .fs-val{font-family:var(--display);font-size:1.7rem;font-weight:800;color:var(--amber);line-height:1;min-width:65px}
+.feat-stat .fs-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,8,11,.92);backdrop-filter:blur(8px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);max-width:800px;width:100%;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px);transition:transform .3s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:2rem 2rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:10;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-close{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:.4rem .8rem;cursor:pointer;transition:all .2s;flex-shrink:0}
+.modal-close:hover{border-color:var(--amber);color:var(--amber)}
+.modal-body{padding:2rem}
+.modal-section{margin-bottom:2rem}
+.modal-section-label{font-family:var(--mono);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--amber);margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.modal-section p{font-size:.86rem;color:var(--text2);line-height:1.85}
+.modal-section ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.modal-section ul li{font-size:.84rem;color:var(--text2);line-height:1.72;padding-left:1.25rem;position:relative}
+.modal-section ul li::before{content:'▸';position:absolute;left:0;color:var(--amber);font-size:.73rem}
+.modal-section ul li strong{color:var(--text)}
+.modal-metrics{display:flex;flex-wrap:wrap;gap:.75rem}
+.m-metric{padding:.75rem 1.2rem;border:1px solid var(--border);background:var(--bg3);text-align:center}
+.m-metric .mv{font-family:var(--display);font-size:1.75rem;font-weight:800;color:var(--amber);line-height:1;display:block}
+.m-metric .ml{font-family:var(--mono);font-size:.57rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-top:.3rem;display:block}
+.modal-tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.mtag{font-family:var(--mono);font-size:.6rem;padding:.3rem .7rem;border:1px solid rgba(249,115,22,.25);color:var(--amber-l);background:rgba(249,115,22,.05)}
+
+/* EXPERIENCE */
+#experience{padding:100px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.exp-timeline{position:relative;padding-left:2rem}
+.exp-timeline::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:1px;background:linear-gradient(to bottom,var(--amber),var(--border))}
+.exp-entry{position:relative;margin-bottom:3.5rem;padding-left:3rem}
+.exp-entry:last-child{margin-bottom:0}
+.exp-entry::before{content:'';position:absolute;left:-2rem;top:.4rem;width:10px;height:10px;background:var(--amber);border-radius:50%;box-shadow:0 0 12px var(--amber)}
+.exp-entry-header{display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.exp-role{font-family:var(--display);font-size:1.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--text)}
+.exp-company{font-family:var(--mono);font-size:.68rem;color:var(--amber);letter-spacing:.1em;margin-top:.25rem}
+.exp-period{font-family:var(--mono);font-size:.63rem;color:var(--text3);white-space:nowrap;padding:.35rem .8rem;border:1px solid var(--border);background:var(--bg3);align-self:flex-start}
+.exp-bullets{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem}
+.exp-bullets li{font-size:.87rem;color:var(--text2);line-height:1.75;padding-left:1.5rem;position:relative}
+.exp-bullets li::before{content:'//';position:absolute;left:0;color:var(--amber);font-family:var(--mono);font-size:.63rem;top:.22rem}
+.exp-bullets li strong{color:var(--text);font-weight:600}
+.exp-tools{display:flex;flex-wrap:wrap;gap:.35rem}
+.etool{font-family:var(--mono);font-size:.58rem;padding:.2rem .6rem;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text3)}
+
+/* SKILLS */
+#skills{padding:100px 0}
+.skills-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem}
+.skill-group{margin-bottom:2rem}
+.skill-group-title{font-family:var(--mono);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--amber);margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.skill-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.spill{font-family:var(--mono);font-size:.61rem;padding:.3rem .75rem;border:1px solid var(--border);color:var(--text2);background:var(--bg2);transition:all .2s;cursor:default}
+.spill:hover,.spill.core{border-color:rgba(249,115,22,.35);color:var(--amber-l);background:rgba(249,115,22,.05)}
+.skills-right{display:flex;flex-direction:column;gap:1.5rem}
+.bar-skill{}
+.bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.63rem;color:var(--text2);margin-bottom:.4rem}
+.bar-label span{color:var(--amber)}
+.bar-track{height:3px;background:var(--bg3);border:1px solid var(--border);overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(to right,var(--amber-d),var(--amber));width:0;transition:width 1.5s cubic-bezier(.22,1,.36,1)}
+
+/* EDUCATION */
+#education{padding:100px 0;background:var(--bg2);border-top:1px solid var(--border)}
+.edu-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.edu-card{border:1px solid var(--border);background:var(--bg3);padding:2rem;transition:border-color .3s}
+.edu-card:hover{border-color:rgba(249,115,22,.3)}
+.edu-badge{font-family:var(--mono);font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;padding:.25rem .7rem;border:1px solid var(--border2);color:var(--text3);display:inline-block;margin-bottom:1rem}
+.edu-degree{font-family:var(--display);font-size:1.2rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem}
+.edu-school{font-family:var(--mono);font-size:.68rem;color:var(--amber);letter-spacing:.08em;margin-bottom:.25rem}
+.edu-date{font-family:var(--mono);font-size:.63rem;color:var(--text3)}
+.cert-cards{display:flex;flex-direction:column;gap:1rem}
+.cert-card{display:flex;align-items:center;gap:1rem;border:1px solid var(--border);padding:1rem 1.25rem;background:var(--bg3);transition:border-color .3s}
+.cert-card:hover{border-color:rgba(249,115,22,.3)}
+.cert-icon{font-size:1.1rem;flex-shrink:0}
+.cert-info{flex:1}
+.cert-name{font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:.2rem}
+.cert-meta{font-family:var(--mono);font-size:.6rem;color:var(--text3)}
+.cert-status{font-family:var(--mono);font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem}
+.cert-status.live{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green)}
+.cert-status.in-progress{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:var(--amber)}
+
+/* CONTACT */
+#contact{padding:100px 0 80px}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.contact-headline{font-family:var(--display);font-size:clamp(2.8rem,6vw,4.8rem);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:-.01em;margin-bottom:1.5rem}
+.contact-headline .hl{color:var(--amber)}
+.contact-body{font-size:.9rem;color:var(--text2);line-height:1.8;margin-bottom:2rem}
+.contact-links{display:flex;flex-direction:column;gap:.75rem}
+.contact-link{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:1px solid var(--border);background:var(--bg2);transition:all .2s}
+.contact-link:hover{border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.04)}
+.cl-icon{font-size:1rem;flex-shrink:0}
+.cl-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:.15rem}
+.cl-val{font-family:var(--mono);font-size:.7rem;color:var(--text)}
+.cl-arrow{margin-left:auto;color:var(--amber);opacity:0;transition:opacity .2s;font-size:.85rem}
+.contact-link:hover .cl-arrow{opacity:1}
+.contact-right{border:1px solid var(--border);background:var(--bg2);padding:2.5rem}
+.contact-form-title{font-family:var(--display);font-size:1.3rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.5rem}
+.form-row{margin-bottom:1rem}
+.form-row label{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:.4rem}
+.form-row input,.form-row textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:.87rem;padding:.75rem 1rem;outline:none;transition:border-color .2s;resize:vertical}
+.form-row input:focus,.form-row textarea:focus{border-color:rgba(249,115,22,.4)}
+.form-row textarea{min-height:100px}
+.form-submit{width:100%;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:.85rem;background:var(--amber);color:var(--bg);border:none;cursor:pointer;transition:background .2s;margin-top:.5rem}
+.form-submit:hover{background:var(--amber-l)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;background:var(--bg2);position:relative;z-index:1}
+.footer-left{font-family:var(--mono);font-size:.6rem;color:var(--text3);letter-spacing:.08em}
+.footer-left strong{color:var(--amber)}
+.footer-right{display:flex;gap:1.5rem}
+.footer-right a{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);transition:color .2s}
+.footer-right a:hover{color:var(--amber)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.12s}
+.reveal-delay-2{transition-delay:.24s}
+.reveal-delay-3{transition-delay:.36s}
+.reveal-delay-4{transition-delay:.48s}
+.reveal-delay-5{transition-delay:.6s}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .nav-links{display:none}
+  .nav-links.open{display:flex;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:1rem;gap:.25rem}
+  .hamburger{display:flex}
+  .about-grid,.contact-grid,.edu-grid,.skills-layout{grid-template-columns:1fr;gap:2.5rem}
+  .expertise-grid{grid-template-columns:1fr 1fr}
+  .projects-grid{grid-template-columns:1fr}
+  .proj-featured .proj-card-inner{grid-template-columns:1fr}
+  .proj-featured-stats{flex-direction:row;flex-wrap:wrap}
+  .feat-stat{flex:1;min-width:110px}
+  .about-sidebar{order:-1}
+  .modal{max-height:100vh}
+}
+@media(max-width:600px){
+  .expertise-grid{grid-template-columns:1fr}
+  .hero-quick-stats{gap:1.2rem}
+  .sec-title{font-size:2.2rem}
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--amber-d)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo"><span class="dot"></span>Saisurya.P</div>
+  <ul class="nav-links" id="navLinks">
+    <a href="#about">About</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#projects">Projects</a>
+    <a href="#experience">Experience</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </ul>
+  <a href="mailto:Saisuryapagidimarri@gmail.com" class="nav-cta">Hire Me</a>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
+</nav>
+
+<section id="hero" class="section">
+  <div class="circuit-lines"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-status"><span class="status-dot"></span>Available for new opportunities</div>
+      <div class="hero-eyebrow">Automation &amp; Controls Engineer</div>
+      <h1 class="hero-name">Saisurya<span class="outline">Pagidimarri</span></h1>
+      <div class="hero-title">Industrial Robotics · PLC/SCADA · Machine Vision · Python</div>
+      <p class="hero-desc">4+ years designing, commissioning, and optimizing industrial robotics and control systems in high-volume manufacturing. From ABB/FANUC robot cells to Python-driven OEE analytics — full lifecycle, measurable results.</p>
+      <div class="hero-actions">
+        <a href="#projects" class="btn-primary">View Projects ↓</a>
+        <a href="#contact" class="btn-outline">Get In Touch</a>
+        <a href="https://www.linkedin.com/in/surya1708" target="_blank" class="btn-outline">LinkedIn ↗</a>
+      </div>
+      <div class="hero-quick-stats">
+        <div class="quick-stat"><span class="val" data-count="4">0</span><span class="lbl">Years Experience</span></div>
+        <div class="quick-stat"><span class="val" data-count="40" data-suffix="%">0</span><span class="lbl">Max Defect Reduction</span></div>
+        <div class="quick-stat"><span class="val" data-count="30" data-suffix="%">0</span><span class="lbl">Throughput Increase</span></div>
+        <div class="quick-stat"><span class="val" data-count="1200" data-suffix="+">0</span><span class="lbl">I/O Points Validated</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="metrics-ticker">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="t-val">+30%</span><span class="t-label">Throughput Increase</span></div>
+    <div class="ticker-item"><span class="t-val">−40%</span><span class="t-label">Defect Reduction</span></div>
+    <div class="ticker-item"><span class="t-val">−25%</span><span class="t-label">Downtime Reduction</span></div>
+    <div class="ticker-item"><span class="t-val">−22%</span><span class="t-label">Cycle Time Saved</span></div>
+    <div class="ticker-item"><span class="t-val">−35%</span><span class="t-label">Fewer Op. Errors</span></div>
+    <div class="ticker-item"><span class="t-val">+28%</span><span class="t-label">Production Efficiency</span></div>
+    <div class="ticker-item"><span class="t-val">1,200+</span><span class="t-label">I/O Points Validated</span></div>
+    <div class="ticker-item"><span class="t-val">500+</span><span class="t-label">Field Devices Integrated</span></div>
+    <div class="ticker-item"><span class="t-val">ZERO</span><span class="t-label">Critical Defects at Go-Live</span></div>
+    <div class="ticker-item"><span class="t-val">+30%</span><span class="t-label">Throughput Increase</span></div>
+    <div class="ticker-item"><span class="t-val">−40%</span><span class="t-label">Defect Reduction</span></div>
+    <div class="ticker-item"><span class="t-val">−25%</span><span class="t-label">Downtime Reduction</span></div>
+    <div class="ticker-item"><span class="t-val">−22%</span><span class="t-label">Cycle Time Saved</span></div>
+    <div class="ticker-item"><span class="t-val">−35%</span><span class="t-label">Fewer Op. Errors</span></div>
+    <div class="ticker-item"><span class="t-val">+28%</span><span class="t-label">Production Efficiency</span></div>
+    <div class="ticker-item"><span class="t-val">1,200+</span><span class="t-label">I/O Points Validated</span></div>
+    <div class="ticker-item"><span class="t-val">500+</span><span class="t-label">Field Devices Integrated</span></div>
+    <div class="ticker-item"><span class="t-val">ZERO</span><span class="t-label">Critical Defects at Go-Live</span></div>
+  </div>
+</div>
+
+<section id="about" class="section">
+  <div class="container">
+    <div class="sec-header reveal"><div><div class="sec-label">// 01 — Profile</div><div class="sec-title">About Me</div></div><div class="sec-rule"></div></div>
+    <div class="about-grid">
+      <div class="about-body reveal">
+        <p>I'm an <strong>Automation & Controls Engineer</strong> with 4+ years of hands-on experience designing, commissioning, and optimizing industrial robotics and PLC/SCADA systems in high-volume discrete manufacturing environments.</p>
+        <p>My work spans the full project lifecycle — from <strong>control system architecture and robot programming</strong> through FAT/SAT commissioning, operator training, and long-term performance sustainment. I'm equally comfortable at the machine level debugging ladder logic and at the data layer building Python pipelines to surface OEE insights.</p>
+        <p>What drives me is the intersection of <strong>physical engineering and data intelligence</strong> — building systems that not only run reliably but get measurably better over time. Every project I deliver has a number attached: throughput gained, defects eliminated, downtime cut.</p>
+        <div class="about-highlights">
+          <div class="highlight-item reveal reveal-delay-1"><span class="h-icon">🤖</span><div class="h-text"><strong>Industrial Robotics (ABB · FANUC · ROS)</strong>Full workcell design, programming, simulation, and commissioning for assembly, welding, and vision-guided inspection.</div></div>
+          <div class="highlight-item reveal reveal-delay-2"><span class="h-icon">⚙️</span><div class="h-text"><strong>PLC / SCADA Systems (Studio 5000 · FactoryTalk · Ignition)</strong>Allen-Bradley control logic, HMI design, alarm management, and real-time production monitoring.</div></div>
+          <div class="highlight-item reveal reveal-delay-3"><span class="h-icon">🐍</span><div class="h-text"><strong>Data-Driven Optimization (Python · SQL · OEE)</strong>Production analytics pipelines that turn raw alarm and cycle-time data into measurable performance gains.</div></div>
+        </div>
+      </div>
+      <div class="about-sidebar reveal reveal-delay-2">
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">// Key Metrics</div>
+          <div class="sidebar-stat-row"><span class="stat-name">Throughput Improvement</span><span class="stat-val good">+30%</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Defect Reduction</span><span class="stat-val good">−40%</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Cycle Time Cut</span><span class="stat-val good">−22%</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Downtime Reduction</span><span class="stat-val good">−25%</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">I/O Points Validated</span><span class="stat-val">1,200+</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Critical Defects at Go-Live</span><span class="stat-val good">ZERO</span></div>
+        </div>
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">// Certifications</div>
+          <div class="cert-list">
+            <div class="cert-item"><span class="cert-dot pending"></span>Rockwell — Studio 5000 / ControlLogix (In Progress)</div>
+            <div class="cert-item"><span class="cert-dot live"></span>ISO 13849 Functional Safety Awareness</div>
+            <div class="cert-item"><span class="cert-dot live"></span>Universal Robots Academy — e-Series Cobots</div>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">// Status</div>
+          <div class="sidebar-stat-row"><span class="stat-name">Location</span><span class="stat-val">NC, USA</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Current</span><span class="stat-val">ABCO Automation</span></div>
+          <div class="sidebar-stat-row"><span class="stat-name">Open To</span><span class="stat-val good">New Roles</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="expertise" class="section">
+  <div class="container"><div class="sec-header reveal"><div><div class="sec-label">// 02 — Capabilities</div><div class="sec-title">Core Expertise</div></div><div class="sec-rule"></div></div></div>
+  <div style="max-width:1140px;margin:0 auto;padding:0 2rem">
+    <div class="expertise-grid">
+      <div class="exp-card reveal"><span class="exp-icon">🤖</span><div class="exp-title">Industrial Robotics</div><div class="exp-body">End-to-end robot workcell design, programming, simulation, and commissioning for assembly, welding, and vision-guided inspection across ABB and FANUC platforms.</div><div class="exp-tags"><span class="etag">ABB Robotics</span><span class="etag">FANUC</span><span class="etag">ROS</span><span class="etag">Pick & Place</span><span class="etag">Welding</span><span class="etag">Robot Commissioning</span></div></div>
+      <div class="exp-card reveal reveal-delay-1"><span class="exp-icon">⚙️</span><div class="exp-title">PLC & Controls</div><div class="exp-body">Allen-Bradley PLC architecture, Studio 5000 logic development, I/O mapping, safety interlocks, and legacy system modernization on ControlLogix/CompactLogix platforms.</div><div class="exp-tags"><span class="etag">Studio 5000</span><span class="etag">ControlLogix</span><span class="etag">RSLogix 5000</span><span class="etag">Safety Interlocks</span></div></div>
+      <div class="exp-card reveal reveal-delay-2"><span class="exp-icon">📊</span><div class="exp-title">SCADA & HMI</div><div class="exp-body">Real-time production visibility through FactoryTalk View and Ignition SCADA — alarm management, performance dashboards, and operator interfaces that cut troubleshooting time.</div><div class="exp-tags"><span class="etag">FactoryTalk View</span><span class="etag">Ignition SCADA</span><span class="etag">Alarm Management</span><span class="etag">OEE Dashboards</span></div></div>
+      <div class="exp-card reveal"><span class="exp-icon">👁️</span><div class="exp-title">Machine Vision</div><div class="exp-body">Vision-guided robotics with AI-based defect detection. Camera calibration, lighting setup, and inline inspection automation maintaining ISO 9001 compliance throughout.</div><div class="exp-tags"><span class="etag">Cognex In-Sight</span><span class="etag">Keyence Vision</span><span class="etag">AI Defect Detection</span><span class="etag">ISO 9001</span></div></div>
+      <div class="exp-card reveal reveal-delay-1"><span class="exp-icon">🌐</span><div class="exp-title">Industrial Networking</div><div class="exp-body">Plant-wide communication infrastructure — 500+ field device integrations over EtherNet/IP and Modbus TCP/IP for reliable, scalable automation environments.</div><div class="exp-tags"><span class="etag">EtherNet/IP</span><span class="etag">Modbus TCP/IP</span><span class="etag">Industrial Ethernet</span><span class="etag">PLC-to-Field</span></div></div>
+      <div class="exp-card reveal reveal-delay-2"><span class="exp-icon">🐍</span><div class="exp-title">Data & Analytics</div><div class="exp-body">Python and SQL pipelines for OEE tracking, cycle time analysis, alarm pattern recognition, and bottleneck identification — turning production data into measurable gains.</div><div class="exp-tags"><span class="etag">Python</span><span class="etag">SQL</span><span class="etag">OEE Analysis</span><span class="etag">Root Cause Analysis</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="section">
+  <div class="container">
+    <div class="sec-header reveal" style="margin-top:100px"><div><div class="sec-label">// 03 — Work</div><div class="sec-title">Projects</div></div><div class="sec-rule"></div></div>
+    <div class="projects-grid">
+
+      <div class="proj-card proj-featured reveal" onclick="openModal('p1')">
+        <div class="proj-card-inner">
+          <div>
+            <div class="proj-num">01 — Featured Project</div>
+            <div class="proj-title">ABB / FANUC Robotic Assembly Cell</div>
+            <div class="proj-desc">Designed and commissioned a multi-robot assembly cell from requirements through go-live — integrating ABB/FANUC robots with machine vision, SCADA, and PLC systems for a high-volume manufacturing line.</div>
+            <div class="proj-tags"><span class="ptag">ABB RobotStudio</span><span class="ptag">FANUC</span><span class="ptag">ROS</span><span class="ptag">Studio 5000</span><span class="ptag">FactoryTalk View</span><span class="ptag">Cognex</span><span class="ptag">Python</span></div>
+            <div class="proj-arrow">Open Case Study →</div>
+          </div>
+          <div class="proj-featured-stats">
+            <div class="feat-stat"><span class="fs-val">+30%</span><span class="fs-label">Throughput</span></div>
+            <div class="feat-stat"><span class="fs-val">−40%</span><span class="fs-label">Defects</span></div>
+            <div class="feat-stat"><span class="fs-val">−22%</span><span class="fs-label">Cycle Time</span></div>
+            <div class="feat-stat"><span class="fs-val">0</span><span class="fs-label">Safety Incidents</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-card reveal reveal-delay-1" onclick="openModal('p2')">
+        <div class="proj-card-inner">
+          <div class="proj-num">02 — SCADA & Monitoring</div>
+          <div class="proj-title">FactoryTalk SCADA Dashboard System</div>
+          <div class="proj-desc">Built real-time production monitoring across PLCs, robots, and field devices — cutting unplanned downtime through structured alarm management and proactive anomaly alerting.</div>
+          <div class="proj-tags"><span class="ptag">FactoryTalk View</span><span class="ptag">Allen-Bradley</span><span class="ptag">EtherNet/IP</span><span class="ptag">Alarm Mgmt</span></div>
+          <div class="proj-metrics"><span class="pmetric">−25% Downtime</span><span class="pmetric">1,200+ I/O</span></div>
+          <div class="proj-arrow">Open Case Study →</div>
+        </div>
+      </div>
+
+      <div class="proj-card reveal reveal-delay-2" onclick="openModal('p3')">
+        <div class="proj-card-inner">
+          <div class="proj-num">03 — Legacy Modernization</div>
+          <div class="proj-title">Legacy PLC Modernization — L&amp;T</div>
+          <div class="proj-desc">Led full automation overhaul of a legacy manufacturing line using Allen-Bradley/Studio 5000 architecture — eliminating sequencing failures and delivering production-validated results at L&amp;T.</div>
+          <div class="proj-tags"><span class="ptag">Studio 5000</span><span class="ptag">ControlLogix</span><span class="ptag">Ignition SCADA</span><span class="ptag">FAT/SAT</span></div>
+          <div class="proj-metrics"><span class="pmetric">+28% Efficiency</span><span class="pmetric">−35% Errors</span></div>
+          <div class="proj-arrow">Open Case Study →</div>
+        </div>
+      </div>
+
+      <div class="proj-card reveal" onclick="openModal('p4')">
+        <div class="proj-card-inner">
+          <div class="proj-num">04 — Machine Vision</div>
+          <div class="proj-title">AI Vision Quality Inspection</div>
+          <div class="proj-desc">Integrated Cognex In-Sight and Keyence cameras with robotic motion control — automating inline defect detection with AI inspection logic at full production cycle speed.</div>
+          <div class="proj-tags"><span class="ptag">Cognex In-Sight</span><span class="ptag">Keyence</span><span class="ptag">AI Inspection</span><span class="ptag">ISO 9001</span></div>
+          <div class="proj-metrics"><span class="pmetric">−40% Defects</span><span class="pmetric">ISO 9001 ✓</span></div>
+          <div class="proj-arrow">Open Case Study →</div>
+        </div>
+      </div>
+
+      <div class="proj-card reveal reveal-delay-1" onclick="openModal('p5')">
+        <div class="proj-card-inner">
+          <div class="proj-num">05 — Data & Analytics</div>
+          <div class="proj-title">Python / SQL OEE Analytics Pipeline</div>
+          <div class="proj-desc">Built production data pipelines that transformed raw cycle time and alarm exports into OEE dashboards and bottleneck reports — feeding continuous optimization into robot programming.</div>
+          <div class="proj-tags"><span class="ptag">Python</span><span class="ptag">SQL</span><span class="ptag">OEE</span><span class="ptag">Root Cause Analysis</span></div>
+          <div class="proj-metrics"><span class="pmetric">+18% Line Efficiency</span></div>
+          <div class="proj-arrow">Open Case Study →</div>
+        </div>
+      </div>
+
+      <div class="proj-card reveal reveal-delay-2" onclick="openModal('p6')">
+        <div class="proj-card-inner">
+          <div class="proj-num">06 — Collaborative Robotics</div>
+          <div class="proj-title">UR10e Collaborative Robot Operations</div>
+          <div class="proj-desc">Developed a pick-and-place operation using the UR10e cobot integrated with external sensors and conveyor systems — optimizing precision and cycle time in an industrial automation setting.</div>
+          <div class="proj-tags"><span class="ptag">URScript</span><span class="ptag">UR10e</span><span class="ptag">Python</span><span class="ptag">Robotics Simulation</span></div>
+          <div class="proj-metrics"><span class="pmetric">Cycle Time Optimized</span></div>
+          <div class="proj-arrow">Open Case Study →</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="experience" class="section">
+  <div class="container">
+    <div class="sec-header reveal"><div><div class="sec-label">// 04 — Career</div><div class="sec-title">Experience</div></div><div class="sec-rule"></div></div>
+    <div class="exp-timeline">
+      <div class="exp-entry reveal">
+        <div class="exp-entry-header">
+          <div><div class="exp-role">Automation &amp; Controls Engineer</div><div class="exp-company">ABCO Automation · NC, USA</div></div>
+          <div class="exp-period">Sep 2024 — Present</div>
+        </div>
+        <ul class="exp-bullets">
+          <li><strong>+30% throughput</strong> — Designed and commissioned ABB/FANUC collaborative robotic assembly cells with full safety zoning, workflow definition, and operator interfaces.</li>
+          <li><strong>−22% cycle time</strong> — Developed and optimized robot programs for Pick &amp; Place, welding, and inspection using ROS and vendor IDEs, validated through pre-deployment simulation.</li>
+          <li><strong>−40% quality defects</strong> — Integrated Cognex In-Sight and Keyence vision systems with robotic motion control — AI-based inspection logic, ISO 9001 compliance maintained.</li>
+          <li><strong>−25% unplanned downtime</strong> — Deployed FactoryTalk View SCADA dashboards connecting PLCs, robots, and field devices for real-time alarms and performance monitoring.</li>
+          <li><strong>+18% line efficiency</strong> — Built Python and SQL analytics pipelines analyzing OEE, cycle time, and alarm data to identify bottlenecks and optimize robot sequencing.</li>
+          <li><strong>Zero critical defects at go-live</strong> — Executed FAT/SAT commissioning across 1,200+ I/O points and 25+ robotic sequences, resolving 15 pre-production issues before startup.</li>
+        </ul>
+        <div class="exp-tools"><span class="etool">ABB RobotStudio</span><span class="etool">FANUC</span><span class="etool">ROS</span><span class="etool">Studio 5000</span><span class="etool">FactoryTalk View</span><span class="etool">Cognex In-Sight</span><span class="etool">Keyence</span><span class="etool">Python</span><span class="etool">SQL</span><span class="etool">EtherNet/IP</span></div>
+      </div>
+      <div class="exp-entry reveal">
+        <div class="exp-entry-header">
+          <div><div class="exp-role">Automation &amp; Controls Engineer</div><div class="exp-company">Larsen &amp; Toubro (L&amp;T) · India</div></div>
+          <div class="exp-period">Jul 2020 — Jun 2023</div>
+        </div>
+        <ul class="exp-bullets">
+          <li><strong>+28% production efficiency</strong> — Delivered full automation of a legacy manufacturing line using Allen-Bradley / Studio 5000 PLC control architecture.</li>
+          <li><strong>−35% operational errors</strong> — Developed and validated PLC logic for conveyors, motors, sensors, and safety interlocks ensuring deterministic, sequenced control.</li>
+          <li><strong>−22% downtime</strong> — Deployed FactoryTalk View and Ignition SCADA solutions with real-time visibility into production metrics, alarms, and system health.</li>
+          <li><strong>500+ field devices</strong> — Integrated plant-wide industrial communication over EtherNet/IP and Modbus TCP/IP for scalable automation infrastructure.</li>
+          <li><strong>+15% throughput &amp; efficiency</strong> — Tuned control parameters and optimized machine cycle times from process and alarm data analysis.</li>
+          <li><strong>Zero critical defects at go-live</strong> — Led FAT/SAT validation across 950+ I/O points and 20+ control sequences with smooth production handover.</li>
+        </ul>
+        <div class="exp-tools"><span class="etool">Studio 5000</span><span class="etool">FactoryTalk View</span><span class="etool">Ignition SCADA</span><span class="etool">EtherNet/IP</span><span class="etool">Modbus TCP/IP</span><span class="etool">ControlLogix</span><span class="etool">CompactLogix</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="section">
+  <div class="container">
+    <div class="sec-header reveal"><div><div class="sec-label">// 05 — Stack</div><div class="sec-title">Skills &amp; Tools</div></div><div class="sec-rule"></div></div>
+    <div class="skills-layout">
+      <div>
+        <div class="skill-group reveal"><div class="skill-group-title">Robotics & Motion Control</div><div class="skill-pills"><span class="spill core">ABB Robotics</span><span class="spill core">FANUC</span><span class="spill core">ROS</span><span class="spill">Pick & Place</span><span class="spill">Welding Automation</span><span class="spill">Inspection Automation</span><span class="spill">Workcell Design</span><span class="spill">Cycle Time Optimization</span><span class="spill">Robot Commissioning</span></div></div>
+        <div class="skill-group reveal reveal-delay-1"><div class="skill-group-title">PLC & Industrial Controls</div><div class="skill-pills"><span class="spill core">Studio 5000</span><span class="spill core">RSLogix 5000</span><span class="spill core">ControlLogix</span><span class="spill">CompactLogix</span><span class="spill">I/O Mapping</span><span class="spill">Safety Interlocks</span><span class="spill">Control Logic Dev</span></div></div>
+        <div class="skill-group reveal reveal-delay-2"><div class="skill-group-title">SCADA & HMI</div><div class="skill-pills"><span class="spill core">FactoryTalk View</span><span class="spill core">Ignition SCADA</span><span class="spill">Alarm Management</span><span class="spill">Real-Time Dashboards</span><span class="spill">Operator Interface</span></div></div>
+        <div class="skill-group reveal reveal-delay-1"><div class="skill-group-title">Machine Vision & Quality</div><div class="skill-pills"><span class="spill core">Cognex In-Sight</span><span class="spill core">Keyence Vision</span><span class="spill">Camera Calibration</span><span class="spill">AI Defect Detection</span><span class="spill">ISO 9001</span></div></div>
+        <div class="skill-group reveal reveal-delay-2"><div class="skill-group-title">Networking & Commissioning</div><div class="skill-pills"><span class="spill core">EtherNet/IP</span><span class="spill core">Modbus TCP/IP</span><span class="spill">FAT/SAT</span><span class="spill">System Commissioning</span><span class="spill">ISO 13849</span><span class="spill">IEC 62061</span></div></div>
+        <div class="skill-group reveal"><div class="skill-group-title">Programming & Analytics</div><div class="skill-pills"><span class="spill core">Python</span><span class="spill core">SQL</span><span class="spill">OEE Analysis</span><span class="spill">Root Cause Analysis</span><span class="spill">Bottleneck Analysis</span></div></div>
+      </div>
+      <div class="skills-right reveal reveal-delay-2">
+        <div style="font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:1.5rem">// Proficiency Levels</div>
+        <div class="bar-skill"><div class="bar-label">Industrial Robotics (ABB/FANUC) <span>95%</span></div><div class="bar-track"><div class="bar-fill" data-width="95"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">PLC Programming (Studio 5000) <span>92%</span></div><div class="bar-track"><div class="bar-fill" data-width="92"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">SCADA & HMI (FactoryTalk/Ignition) <span>88%</span></div><div class="bar-track"><div class="bar-fill" data-width="88"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">Machine Vision (Cognex/Keyence) <span>85%</span></div><div class="bar-track"><div class="bar-fill" data-width="85"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">Python & SQL Analytics <span>80%</span></div><div class="bar-track"><div class="bar-fill" data-width="80"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">Industrial Networking <span>87%</span></div><div class="bar-track"><div class="bar-fill" data-width="87"></div></div></div>
+        <div class="bar-skill" style="margin-top:1rem"><div class="bar-label">FAT/SAT & Commissioning <span>93%</span></div><div class="bar-track"><div class="bar-fill" data-width="93"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="education" class="section">
+  <div class="container">
+    <div class="sec-header reveal"><div><div class="sec-label">// 06 — Background</div><div class="sec-title">Education &amp; Certs</div></div><div class="sec-rule"></div></div>
+    <div class="edu-grid">
+      <div class="edu-card reveal">
+        <div class="edu-badge">Graduate Degree</div>
+        <div class="edu-degree">Master of Science in Engineering Management</div>
+        <div class="edu-school">Lamar University</div>
+        <div class="edu-date">Aug 2023 — Dec 2024 · Beaumont, TX</div>
+      </div>
+      <div class="cert-cards reveal reveal-delay-1">
+        <div class="cert-card"><span class="cert-icon">⚙️</span><div class="cert-info"><div class="cert-name">Studio 5000 / ControlLogix</div><div class="cert-meta">Rockwell Automation</div></div><span class="cert-status in-progress">In Progress</span></div>
+        <div class="cert-card"><span class="cert-icon">🛡️</span><div class="cert-info"><div class="cert-name">Functional Safety Awareness</div><div class="cert-meta">ISO 13849 Certified</div></div><span class="cert-status live">Certified</span></div>
+        <div class="cert-card"><span class="cert-icon">🤖</span><div class="cert-info"><div class="cert-name">e-Series Collaborative Robots</div><div class="cert-meta">Universal Robots Academy</div></div><span class="cert-status live">Certified</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="section">
+  <div class="container">
+    <div class="sec-header reveal" style="margin-top:100px"><div><div class="sec-label">// 07 — Connect</div><div class="sec-title">Get In Touch</div></div><div class="sec-rule"></div></div>
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="contact-headline">Let's Build<br>Something <span class="hl">That Works.</span></div>
+        <p class="contact-body">Open to new automation engineering roles, contract commissioning projects, and technical consultations. If you're building industrial systems that need to perform reliably at scale — let's talk.</p>
+        <div class="contact-links">
+          <a href="mailto:Saisuryapagidimarri@gmail.com" class="contact-link"><span class="cl-icon">✉</span><div><span class="cl-label">Email</span><span class="cl-val">Saisuryapagidimarri@gmail.com</span></div><span class="cl-arrow">↗</span></a>
+          <a href="https://www.linkedin.com/in/surya1708" target="_blank" class="contact-link"><span class="cl-icon">💼</span><div><span class="cl-label">LinkedIn</span><span class="cl-val">linkedin.com/in/surya1708</span></div><span class="cl-arrow">↗</span></a>
+          <a href="https://github.com/Saisurya1708" target="_blank" class="contact-link"><span class="cl-icon">⌥</span><div><span class="cl-label">GitHub</span><span class="cl-val">github.com/Saisurya1708</span></div><span class="cl-arrow">↗</span></a>
+          <a href="tel:+19105023272" class="contact-link"><span class="cl-icon">📞</span><div><span class="cl-label">Phone</span><span class="cl-val">+1 (910) 502-3272</span></div><span class="cl-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="contact-right reveal reveal-delay-2">
+        <div class="contact-form-title">Send a Message</div>
+
+        <!-- ✅ FORMSPREE: replace YOUR_FORM_ID below after signing up at formspree.io -->
+        <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleFormspreeSubmit(event)">
+
+          <div class="form-row">
+            <label for="f-name">Your Name</label>
+            <input id="f-name" type="text" name="name" placeholder="Jane Smith" required>
+          </div>
+          <div class="form-row">
+            <label for="f-email">Email Address</label>
+            <input id="f-email" type="email" name="email" placeholder="jane@company.com" required>
+          </div>
+          <div class="form-row">
+            <label for="f-subject">Subject</label>
+            <input id="f-subject" type="text" name="subject" placeholder="Automation Engineer opportunity" required>
+          </div>
+          <div class="form-row">
+            <label for="f-message">Message</label>
+            <textarea id="f-message" name="message" placeholder="Tell me about the role or project..." required></textarea>
+          </div>
+
+          <!-- hidden honeypot to block spam -->
+          <input type="text" name="_gotcha" style="display:none">
+
+          <button type="submit" class="form-submit" id="formBtn">Send Message →</button>
+
+          <div id="formSuccess" style="display:none;margin-top:1rem;padding:1rem;border:1px solid rgba(74,222,128,.35);background:rgba(74,222,128,.07);font-family:var(--mono);font-size:.68rem;color:var(--green);letter-spacing:.05em;">
+            ✓ Message sent — I'll get back to you within 24 hours.
+          </div>
+          <div id="formError" style="display:none;margin-top:1rem;padding:1rem;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.07);font-family:var(--mono);font-size:.68rem;color:var(--red);letter-spacing:.05em;">
+            ✗ Something went wrong. Please email me directly at Saisuryapagidimarri@gmail.com
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">© 2025 <strong>Saisurya Pagidimarri</strong> · Automation &amp; Controls Engineer · NC, USA</div>
+  <div class="footer-right">
+    <a href="#hero">Top ↑</a>
+    <a href="https://www.linkedin.com/in/surya1708" target="_blank">LinkedIn</a>
+    <a href="https://github.com/Saisurya1708" target="_blank">GitHub</a>
+    <a href="mailto:Saisuryapagidimarri@gmail.com">Email</a>
+  </div>
+</footer>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div>
+        <div id="modalNum" style="font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;color:var(--text3);margin-bottom:.4rem"></div>
+        <div id="modalTitle" style="font-family:var(--display);font-size:1.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em"></div>
+        <div id="modalSub" style="font-family:var(--mono);font-size:.63rem;color:var(--amber);margin-top:.3rem"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕ Close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const projects={p1:{num:'01 — Featured Project',title:'ABB / FANUC Robotic Assembly Cell',sub:'ABCO Automation · NC, USA · Sep 2024 – Present',outcome:'Increased production throughput 30% and cut quality defects 40% by designing and commissioning a fully integrated multi-robot assembly cell with machine vision and real-time SCADA monitoring.',challenge:'The existing assembly process relied heavily on manual labor for Pick & Place, welding, and quality inspection — resulting in inconsistent throughput, high defect rates, and significant labor dependency. The client needed a scalable automated solution meeting ISO 9001 standards while reducing cycle time.',approach:['Designed full robot workcell layout including safety zoning, operator interfaces, and workflow integration with cross-functional teams.','Developed and optimized ABB/FANUC robot programs for Pick & Place, welding, and inspection in ROS and vendor-specific IDEs — validated via simulation before deployment.','Integrated Cognex In-Sight and Keyence vision systems with motion control — configuring camera calibration, LED lighting, and AI-based inspection logic for inline defect detection.','Deployed FactoryTalk View SCADA dashboards connecting PLCs, robots, and field devices for real-time monitoring, alarms, and anomaly alerting.','Built Python and SQL analytics pipelines to monitor OEE, cycle time, and alarm data — feeding continuous optimizations back into robot path and sequencing logic.','Executed FAT/SAT commissioning across 1,200+ I/O points and 25+ robotic sequences, resolving 15 pre-production issues. Trained operators and developed SOPs.'],metrics:[{v:'+30%',l:'Throughput'},{v:'−40%',l:'Defects'},{v:'−22%',l:'Cycle Time'},{v:'−25%',l:'Downtime'},{v:'+18%',l:'Line Efficiency'},{v:'0',l:'Safety Incidents'}],tags:['ABB RobotStudio','FANUC','ROS','Studio 5000','FactoryTalk View','Cognex In-Sight','Keyence','Python','SQL','EtherNet/IP','ISO 9001','FAT/SAT']},p2:{num:'02 — SCADA & Monitoring',title:'FactoryTalk SCADA Dashboard System',sub:'ABCO Automation · NC, USA · 2024',outcome:'Reduced unplanned downtime 25% by designing and deploying a FactoryTalk View SCADA system that unified real-time visibility across robots, PLCs, and field devices on a live production floor.',challenge:'The robotic assembly line had no centralized visibility system — operators were reacting to failures rather than preventing them. Downtime events were hard to diagnose, alarms inconsistently logged, and no single source of truth for performance data existed.',approach:['Designed the SCADA architecture integrating Allen-Bradley PLCs, ABB/FANUC robots, and 1,200+ field devices over EtherNet/IP into a single monitoring environment.','Built FactoryTalk View dashboards displaying robot performance, line throughput, alarm states, and system health — tailored for operators and supervisors.','Developed a structured alarm management system with priority tiers, suppression logic, and escalation rules to drive rapid response without alert fatigue.','Configured proactive monitoring triggers that flag degrading trends before downtime events occur — shifting from reactive to predictive maintenance.','Validated all SCADA tags, I/O mappings, and communications during FAT/SAT commissioning to ensure data integrity across all connected systems.'],metrics:[{v:'−25%',l:'Downtime'},{v:'1,200+',l:'I/O Points'},{v:'Real-Time',l:'Visibility'}],tags:['FactoryTalk View','Allen-Bradley','Studio 5000','EtherNet/IP','Alarm Management','HMI Design','FAT/SAT','OEE Monitoring']},p3:{num:'03 — Legacy Modernization',title:'Legacy PLC Modernization — L&T',sub:'Larsen & Toubro (L&T) · India · Jul 2020 – Jun 2023',outcome:'Improved production efficiency 28% and reduced operational errors 35% by leading a full-scope automation overhaul of a legacy manufacturing line using Allen-Bradley / Studio 5000 PLC architecture.',challenge:'A high-throughput facility was running a legacy line with aging, poorly documented control systems. Frequent sequencing failures, high error rates, and limited diagnostic visibility were costing significant downtime and quality losses — requiring a ground-up redesign.',approach:['Designed the full Allen-Bradley PLC control architecture — defining I/O mapping, control panel design, and equipment integration points.','Developed and validated PLC ladder logic and function block programs for conveyors, motors, sensors, and safety interlocks in Studio 5000, ensuring deterministic operation.','Performed detailed testing and debugging on all control sequences, eliminating sequencing issues that had been a persistent source of operational errors.','Deployed FactoryTalk View and Ignition SCADA solutions providing real-time visibility into production metrics, alarms, and system health.','Integrated 500+ field devices over EtherNet/IP and Modbus TCP/IP establishing a reliable communication backbone for plant-wide automation.','Led customer-facing FAT/SAT validation across 950+ I/O points and 20+ control sequences — zero critical defects at go-live, smooth production handover.'],metrics:[{v:'+28%',l:'Efficiency'},{v:'−35%',l:'Op. Errors'},{v:'−22%',l:'Downtime'},{v:'500+',l:'Field Devices'},{v:'0',l:'Defects at Go-Live'}],tags:['Studio 5000','RSLogix 5000','ControlLogix','FactoryTalk View','Ignition SCADA','EtherNet/IP','Modbus TCP/IP','FAT/SAT','Safety Interlocks']},p4:{num:'04 — Machine Vision',title:'AI Vision Quality Inspection System',sub:'ABCO Automation · NC, USA · 2024',outcome:'Cut product defects 40% by integrating Cognex In-Sight and Keyence vision systems with industrial robots to automate real-time quality inspection using AI-based detection logic — sustaining ISO 9001 compliance.',challenge:'Manual visual inspection was a production bottleneck and quality liability — inconsistent results, inspector fatigue, and high escape rates to downstream processes. The team needed automated inspection tightly integrated with robotic motion control at full production speed.',approach:['Designed the vision system architecture — selecting and positioning Cognex In-Sight and Keyence cameras based on inspection requirements, part geometry, and lighting analysis.','Performed full camera calibration and configured LED lighting rigs to ensure consistent image quality across varying part presentations and ambient conditions.','Developed AI-based inspection logic using the cameras\' built-in detection frameworks — training models to identify surface defects, dimensional variance, and assembly errors at cycle speed.','Integrated vision systems with ABB/FANUC robot motion control — triggering inspection routines at precise cycle points and feeding reject/accept signals back to PLC and SCADA.','Established defect logging and traceability workflow documenting results against production lot data, supporting ISO 9001 quality audit requirements.'],metrics:[{v:'−40%',l:'Defects'},{v:'ISO 9001',l:'Maintained'},{v:'Real-Time',l:'Inspection'},{v:'Full',l:'Traceability'}],tags:['Cognex In-Sight','Keyence Vision','AI Defect Detection','Camera Calibration','Lighting Config','ABB Robotics','FANUC','Studio 5000','ISO 9001']},p5:{num:'05 — Data & Analytics',title:'Python / SQL OEE Analytics Pipeline',sub:'ABCO Automation · NC, USA · 2024 – Present',outcome:'Improved line efficiency 18% by building Python and SQL data pipelines that transformed raw production, cycle time, and alarm data into actionable OEE insights — driving continuous optimization of robot programming and sequencing.',challenge:'The assembly line generated large volumes of production data — cycle times, alarm logs, throughput counts, reject rates — but no systematic process to analyze it. Performance issues identified reactively with no data-driven basis for robot path or sequencing decisions.',approach:['Designed a data pipeline architecture to extract production metrics from PLCs and SCADA, normalize the data, and load it into a structured SQL database for analysis.','Built Python scripts to calculate OEE (Availability, Performance, Quality) across production shifts — identifying which loss categories were the dominant efficiency drivers.','Developed automated bottleneck detection logic that flagged robot stations, sequences, or time periods contributing disproportionately to cycle time losses.','Translated analytics findings directly into robot programming improvements — adjusting trajectories, motion profiles, and sequencing logic based on data evidence.','Created summary dashboards enabling the engineering team to track OEE trends and measure the impact of each optimization cycle.'],metrics:[{v:'+18%',l:'Line Efficiency'},{v:'OEE',l:'Tracked Live'},{v:'Data-Driven',l:'Optimization'}],tags:['Python','SQL','OEE Analysis','Bottleneck Analysis','Root Cause Analysis','FactoryTalk View','Data Pipelines','Performance Optimization']},p6:{num:'06 — Collaborative Robotics',title:'UR10e Collaborative Robot Operations',sub:'Personal / Academic Project',outcome:'Developed a robotic pick-and-place operation using the UR10e collaborative robot integrated with external sensors and conveyor systems — optimizing precision and cycle time in an industrial automation setting.',challenge:'Designing a reliable, repeatable pick-and-place system that could handle variability in part presentation and conveyor timing while maintaining precise placement accuracy using a collaborative robot platform.',approach:['Programmed the UR10e in URScript for pick-and-place sequences including gripper control, approach/retract trajectories, and error recovery logic.','Integrated external sensors for part detection on the conveyor, creating event-driven triggers that synchronized robot motion with material flow.','Ran robotics simulations to validate path planning and verify collision-free trajectories before physical deployment.','Optimized cycle time by tuning motion profiles, reducing unnecessary waypoints, and adjusting conveyor speed relative to robot cycle cadence.','Used Python for data logging and basic performance analysis to measure actual vs. target cycle time across test runs.'],metrics:[{v:'UR10e',l:'Platform'},{v:'URScript',l:'Language'},{v:'Cycle Time',l:'Optimized'}],tags:['URScript','UR10e','Python','Robotics Simulation','Conveyor Systems','Pick & Place','Sensor Integration']}};
+
+function openModal(id){const p=projects[id];document.getElementById('modalNum').textContent=p.num;document.getElementById('modalTitle').textContent=p.title;document.getElementById('modalSub').textContent=p.sub;document.getElementById('modalBody').innerHTML=`<div class="modal-section"><div class="modal-section-label">Outcome</div><p>${p.outcome}</p></div><div class="modal-section"><div class="modal-section-label">The Challenge</div><p>${p.challenge}</p></div><div class="modal-section"><div class="modal-section-label">Approach</div><ul>${p.approach.map(a=>`<li>${a}</li>`).join('')}</ul></div><div class="modal-section"><div class="modal-section-label">Results</div><div class="modal-metrics">${p.metrics.map(m=>`<div class="m-metric"><span class="mv">${m.v}</span><span class="ml">${m.l}</span></div>`).join('')}</div></div><div class="modal-section"><div class="modal-section-label">Technologies</div><div class="modal-tags">${p.tags.map(t=>`<span class="mtag">${t}</span>`).join('')}</div></div>`;document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow=''}
+function closeModalOnBg(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
+
+const secs=['hero','about','expertise','projects','experience','skills','education','contact'];
+window.addEventListener('scroll',()=>{const y=window.scrollY+80;secs.forEach(id=>{const el=document.getElementById(id);if(!el)return;const top=el.offsetTop,bot=top+el.offsetHeight;document.querySelectorAll(`.nav-links a[href="#${id}"]`).forEach(a=>{a.classList.toggle('active',y>=top&&y<bot)})})});
+
+const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');e.target.querySelectorAll('.bar-fill').forEach(b=>{b.style.width=b.dataset.width+'%'})}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+document.querySelectorAll('.bar-fill').forEach(bar=>{const bo=new IntersectionObserver(entries=>{if(entries[0].isIntersecting){setTimeout(()=>bar.style.width=bar.dataset.width+'%',200);bo.disconnect()}},{threshold:.5});bo.observe(bar)});
+
+function animateCount(el){const target=parseInt(el.dataset.count);const suffix=el.dataset.suffix||'';const step=target/(1500/16);let current=0;const t=setInterval(()=>{current=Math.min(current+step,target);el.textContent=(current>=1000?Math.round(current).toLocaleString():Math.round(current))+suffix;if(current>=target)clearInterval(t)},16)}
+const co=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('[data-count]').forEach(animateCount);co.unobserve(e.target)}})},{threshold:.5});
+document.querySelectorAll('.hero-quick-stats').forEach(el=>co.observe(el));
+
+async function handleFormspreeSubmit(e){
+  e.preventDefault();
+  const form=document.getElementById('contactForm');
+  const btn=document.getElementById('formBtn');
+  const successEl=document.getElementById('formSuccess');
+  const errorEl=document.getElementById('formError');
+  successEl.style.display='none';
+  errorEl.style.display='none';
+  btn.textContent='Sending...';
+  btn.disabled=true;
+  btn.style.opacity='.7';
+  try{
+    const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{Accept:'application/json'}});
+    if(res.ok){
+      successEl.style.display='block';
+      form.reset();
+      btn.textContent='Sent ✓';
+      btn.style.background='var(--green)';
+    } else {
+      throw new Error('Server error');
+    }
+  } catch(err){
+    errorEl.style.display='block';
+    btn.textContent='Send Message →';
+    btn.style.opacity='1';
+    btn.disabled=false;
+  }
+}
+</script>
+</body>
+</html>
