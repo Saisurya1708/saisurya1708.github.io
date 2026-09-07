@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>PoseCoach Camera Test 2</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;overflow:hidden}
+  button{font:inherit}
+  #landing{min-height:100svh;padding:calc(40px + env(safe-area-inset-top)) 26px calc(30px + env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 50% 20%,#242424,#080808 55%)}
+  .eyebrow{font-size:12px;letter-spacing:.18em;opacity:.62;margin-bottom:12px}
+  h1{font-size:42px;line-height:1;margin:0 0 16px;letter-spacing:-.04em}
+  p{font-size:17px;line-height:1.45;opacity:.78}
+  #startBtn{margin-top:20px;height:58px;border:0;border-radius:17px;background:#fff;color:#000;font-weight:700}
+  #status{margin-top:14px;min-height:48px;font-size:13px;white-space:pre-wrap;opacity:.75}
+  #cameraScreen{display:none;position:fixed;inset:0;background:#000}
+  #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+  #guide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .top{position:absolute;z-index:3;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center}
+  .glass{background:rgba(10,10,10,.58);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#fff;border-radius:14px}
+  .small{height:42px;padding:0 13px;border:0}
+  #debug{padding:8px 11px;font-size:11px;max-width:55%;text-align:center}
+  .cue{position:absolute;z-index:3;left:14px;right:14px;bottom:calc(130px + env(safe-area-inset-bottom));padding:14px;border-radius:18px;background:rgba(10,10,10,.6);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .cue b{display:block;font-size:10px;letter-spacing:.14em;opacity:.58;margin-bottom:5px}
+  .controls{position:absolute;z-index:3;left:14px;right:14px;bottom:calc(20px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 82px 1fr;align-items:center;gap:16px}
+  .control{height:54px;border:0}
+  #shutter{width:76px;height:76px;border-radius:50%;border:6px solid rgba(255,255,255,.38);background:#fff;box-shadow:inset 0 0 0 3px #111}
+  #fallbackPlay{display:none;position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);padding:14px 20px;border:0}
+  #count{display:none;position:absolute;z-index:8;inset:0;place-items:center;font-size:96px;font-weight:800;text-shadow:0 4px 20px #000}
+</style>
+</head>
+<body>
+<section id="landing">
+  <div class="eyebrow">POSECOACH · CAMERA TEST 2</div>
+  <h1>Fresh camera test</h1>
+  <p>This page bypasses the previous cache completely. After permission succeeds, the camera view should replace this screen immediately.</p>
+  <button id="startBtn">Start camera</button>
+  <div id="status">Ready.</div>
+</section>
+
+<section id="cameraScreen">
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="guide"></canvas>
+
+  <div class="top">
+    <button id="backBtn" class="glass small">‹ Back</button>
+    <div id="debug" class="glass">stream acquired</div>
+    <button id="flipBtn" class="glass small">Flip</button>
+  </div>
+
+  <button id="fallbackPlay" class="glass">Tap to start preview</button>
+
+  <div class="cue"><b>YOU</b>Put most of your weight on the leg farther from the camera.</div>
+
+  <div class="controls">
+    <button id="guideBtn" class="glass control">Guide</button>
+    <button id="shutter" aria-label="Take photo"></button>
+    <button id="nextBtn" class="glass control">Next</button>
+  </div>
+  <div id="count"></div>
+</section>
+
+<canvas id="capture" style="display:none"></canvas>
+
+<script>
+(() => {
+  const landing = document.getElementById('landing');
+  const cameraScreen = document.getElementById('cameraScreen');
+  const startBtn = document.getElementById('startBtn');
+  const status = document.getElementById('status');
+  const video = document.getElementById('video');
+  const debug = document.getElementById('debug');
+  const fallbackPlay = document.getElementById('fallbackPlay');
+  const guide = document.getElementById('guide');
+  const g = guide.getContext('2d');
+  const capture = document.getElementById('capture');
+  const c = capture.getContext('2d');
+  let stream = null;
+  let facing = 'environment';
+  let guideOn = true;
+  let cueIndex = 0;
+
+  const cues = [
+    'Put most of your weight on the leg farther from the camera.',
+    'Turn your chest slightly away from the camera.',
+    'Soften the knee closer to the camera.',
+    'Put your camera-side thumb lightly in a pocket.',
+    'Bring your chin slightly forward and down.'
+  ];
+
+  function showCameraUI() {
+    landing.style.display = 'none';
+    cameraScreen.style.display = 'block';
+    requestAnimationFrame(() => {
+      resizeGuide();
+      drawGuide();
+    });
+  }
+
+  function setDebug(msg) {
+    debug.textContent = msg;
+  }
+
+  async function startCamera() {
+    status.textContent = 'Requesting camera…';
+    if (!window.isSecureContext) {
+      status.textContent = 'Not a secure HTTPS page.';
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      status.textContent = 'getUserMedia is unavailable in this browser.';
+      return;
+    }
+
+    try {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio:false,
+        video:{facingMode:{ideal:facing}}
+      });
+
+      // Critical: switch UI immediately after stream acquisition.
+      showCameraUI();
+      setDebug('camera stream acquired');
+
+      video.srcObject = stream;
+
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(err => {
+          setDebug('preview paused: ' + (err.name || 'play error'));
+          fallbackPlay.style.display = 'block';
+        });
+      }
+
+      video.addEventListener('loadedmetadata', () => {
+        setDebug('preview ' + video.videoWidth + '×' + video.videoHeight);
+        fallbackPlay.style.display = 'none';
+        resizeGuide();
+      }, {once:true});
+
+      setTimeout(() => {
+        if (!video.videoWidth) {
+          setDebug('stream active; preview waiting');
+          fallbackPlay.style.display = 'block';
+        }
+      }, 1200);
+
+    } catch (err) {
+      status.textContent = 'Camera failed: ' + (err.name || 'Error') + '\n' + (err.message || '');
+    }
+  }
+
+  async function retryPlay() {
+    try {
+      await video.play();
+      fallbackPlay.style.display = 'none';
+      setDebug('preview playing');
+    } catch (err) {
+      setDebug('play failed: ' + (err.name || 'Error'));
+    }
+  }
+
+  function resizeGuide() {
+    const dpr = Math.min(devicePixelRatio || 1, 3);
+    guide.width = Math.round(innerWidth * dpr);
+    guide.height = Math.round(innerHeight * dpr);
+    guide.style.width = innerWidth + 'px';
+    guide.style.height = innerHeight + 'px';
+    g.setTransform(dpr,0,0,dpr,0,0);
+    drawGuide();
+  }
+
+  function line(a,b) { g.beginPath(); g.moveTo(a[0],a[1]); g.lineTo(b[0],b[1]); g.stroke(); }
+  function drawGuide() {
+    const w = innerWidth, h = innerHeight;
+    g.clearRect(0,0,w,h);
+    if (!guideOn) return;
+    g.save();
+    g.globalAlpha=.55;
+    g.strokeStyle='#fff';
+    g.lineWidth=4;
+    g.lineCap='round';
+    g.shadowColor='rgba(0,0,0,.5)';
+    g.shadowBlur=4;
+
+    const cx=w*.52, top=h*.17, H=h*.64;
+    const p={
+      head:[cx+7,top], neck:[cx+3,top+H*.11],
+      ls:[cx-31,top+H*.16], rs:[cx+34,top+H*.14],
+      le:[cx-45,top+H*.31], re:[cx+54,top+H*.29],
+      lw:[cx-27,top+H*.43], rw:[cx+42,top+H*.42],
+      hip:[cx+7,top+H*.48],
+      lk:[cx-3,top+H*.68], rk:[cx+28,top+H*.70],
+      la:[cx-18,top+H*.91], ra:[cx+50,top+H*.92],
+      lf:[cx-33,top+H*.97], rf:[cx+70,top+H*.97]
+    };
+    g.beginPath(); g.arc(p.head[0],p.head[1],22,0,Math.PI*2); g.stroke();
+    line(p.neck,p.ls); line(p.neck,p.rs); line(p.ls,p.le); line(p.le,p.lw);
+    line(p.rs,p.re); line(p.re,p.rw); line(p.neck,p.hip);
+    line(p.hip,p.lk); line(p.lk,p.la); line(p.la,p.lf);
+    line(p.hip,p.rk); line(p.rk,p.ra); line(p.ra,p.rf);
+    g.restore();
+  }
+
+  async function countdownAndCapture() {
+    const count = document.getElementById('count');
+    count.style.display='grid';
+    for (const n of [5,4,3,2,1]) {
+      count.textContent=n;
+      await new Promise(r => setTimeout(r,1000));
+    }
+    count.style.display='none';
+
+    if (!video.videoWidth) {
+      setDebug('cannot capture: no video frame');
+      return;
+    }
+    capture.width=video.videoWidth;
+    capture.height=video.videoHeight;
+    c.drawImage(video,0,0,capture.width,capture.height);
+    capture.toBlob(blob => {
+      if (!blob) return;
+      const url=URL.createObjectURL(blob);
+      window.open(url,'_blank');
+    },'image/jpeg',.94);
+  }
+
+  startBtn.addEventListener('click', startCamera);
+  fallbackPlay.addEventListener('click', retryPlay);
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    cameraScreen.style.display='none';
+    landing.style.display='flex';
+  });
+  document.getElementById('flipBtn').addEventListener('click', async () => {
+    facing = facing === 'environment' ? 'user' : 'environment';
+    await startCamera();
+  });
+  document.getElementById('guideBtn').addEventListener('click', e => {
+    guideOn=!guideOn;
+    e.currentTarget.textContent=guideOn?'Guide':'Off';
+    drawGuide();
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    cueIndex=(cueIndex+1)%cues.length;
+    document.querySelector('.cue').innerHTML='<b>YOU</b>'+cues[cueIndex];
+  });
+  document.getElementById('shutter').addEventListener('click', countdownAndCapture);
+  addEventListener('resize', resizeGuide);
+})();
+</script>
+</body>
+</html>
