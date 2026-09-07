@@ -30,32 +30,76 @@ function setCue() {
 }
 
 async function startCamera() {
-  $("landingStatus").textContent = "";
-  if (!navigator.mediaDevices?.getUserMedia) {
-    $("landingStatus").textContent = "This browser does not expose camera access. Open the page directly in Safari.";
+  const landingStatus = $("landingStatus");
+  const cameraStatus = $("cameraStatus");
+  landingStatus.textContent = "";
+
+  if (!window.isSecureContext) {
+    landingStatus.textContent = "Camera access needs a secure HTTPS page.";
     return;
   }
+  if (!navigator.mediaDevices?.getUserMedia) {
+    landingStatus.textContent = "Safari camera access is unavailable on this page.";
+    return;
+  }
+
   try {
     if (stream) stream.getTracks().forEach(t => t.stop());
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: {
-        facingMode: { ideal: facingMode },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      }
-    });
-    video.srcObject = stream;
-    await video.play();
+
+    // Ask for the preferred camera first, then fall back to any camera.
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: facingMode },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      });
+    } catch (preferredError) {
+      console.warn("Preferred camera request failed; falling back.", preferredError);
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+    }
+
+    // Make the viewfinder visible BEFORE asking the inline video to play.
     landing.hidden = true;
     result.hidden = true;
     cameraScreen.hidden = false;
-    $("cameraStatus").textContent = facingMode === "environment" ? "Rear camera · first test" : "Front camera · mirrored preview";
+
+    video.srcObject = stream;
+    video.muted = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("autoplay", "");
+
+    cameraStatus.textContent = "Starting camera…";
+
+    // iPhone Safari can reject play() while a video is hidden. At this point it is visible.
+    try {
+      await video.play();
+    } catch (playError) {
+      console.warn("Explicit video.play() failed; autoplay may still start.", playError);
+    }
+
+    // Give Safari a moment to expose video dimensions, then draw the guide.
+    await new Promise(resolve => {
+      if (video.readyState >= 2 && video.videoWidth) return resolve();
+      const done = () => resolve();
+      video.addEventListener("loadedmetadata", done, { once: true });
+      setTimeout(done, 1200);
+    });
+
+    cameraStatus.textContent =
+      facingMode === "environment" ? "Rear camera · first test" : "Front camera · first test";
     resizeOverlay();
     requestAnimationFrame(drawOverlay);
   } catch (err) {
     console.error(err);
-    $("landingStatus").textContent = "Camera could not start. Check Safari camera permission for this site, then try again.";
+    stopCamera();
+    cameraScreen.hidden = true;
+    landing.hidden = false;
+    const name = err?.name || "CameraError";
+    const message = err?.message || "Unknown camera error";
+    landingStatus.textContent = `Camera failed: ${name}. ${message}`;
   }
 }
 
