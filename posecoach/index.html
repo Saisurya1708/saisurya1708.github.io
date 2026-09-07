@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#111111" />
+  <title>PoseCoach Prototype</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+    <section id="landing" class="panel">
+      <div class="eyebrow">POSECOACH · BUILD 0</div>
+      <h1>Relaxed Wall Lean</h1>
+      <p class="lede">First-device test for iPhone. Camera + static guide + 5-second capture.</p>
+      <div class="setup">
+        <div><strong>Phone</strong><span>Portrait, 1× if possible</span></div>
+        <div><strong>Height</strong><span>About chest height</span></div>
+        <div><strong>Distance</strong><span>Enough room for your full body</span></div>
+        <div><strong>Light</strong><span>Bright room or open shade</span></div>
+      </div>
+      <button id="startBtn" class="primary">Start camera</button>
+      <p id="landingStatus" class="status"></p>
+    </section>
+
+    <section id="cameraScreen" hidden>
+      <div id="cameraWrap">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+
+        <div class="topbar">
+          <button id="backBtn" class="glass small">‹ Library</button>
+          <div class="poseTitle">Relaxed Wall Lean</div>
+          <button id="flipBtn" class="glass small">Flip</button>
+        </div>
+
+        <div class="coachCard glass">
+          <div class="actor">YOU</div>
+          <div id="cue">Put most of your weight on the leg farther from the camera.</div>
+          <button id="nextCue" class="cueNext">Next ›</button>
+        </div>
+
+        <div class="controls">
+          <div class="opacityBox glass">
+            <label for="opacity">Guide</label>
+            <input id="opacity" type="range" min="0" max="100" value="52" />
+          </div>
+          <button id="shutter" class="shutter" aria-label="Take photo"></button>
+          <button id="guideToggle" class="glass modeBtn">Guide</button>
+        </div>
+
+        <div id="countdown" class="countdown" hidden></div>
+        <div id="cameraStatus" class="cameraStatus glass">Camera ready</div>
+      </div>
+    </section>
+
+    <section id="result" class="panel" hidden>
+      <div class="eyebrow">CAPTURED</div>
+      <h2>First PoseCoach test shot</h2>
+      <img id="captured" alt="Captured PoseCoach test photo" />
+      <div class="resultButtons">
+        <button id="retakeBtn" class="secondary">Retake</button>
+        <button id="shareBtn" class="primary">Share / Save</button>
+      </div>
+      <p id="shareStatus" class="status"></p>
+    </section>
+  </main>
+
+  <canvas id="captureCanvas" hidden></canvas>
+  <script src="app.js"></script>
+</body>
+</html>
