@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#050505">
+<title>PoseCoach Scene Coach</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;--safeT:env(safe-area-inset-top);--safeB:env(safe-area-inset-bottom)}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#050505;color:white;overflow:hidden}
+button{font:inherit;color:inherit;border:0}
+.hidden{display:none!important}
+#intro{height:100svh;padding:calc(36px + var(--safeT)) 22px calc(26px + var(--safeB));display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 50% 12%,#262626,#070707 52%)}
+.kicker{font-size:11px;letter-spacing:.17em;opacity:.58;margin-bottom:10px}
+h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
+.lede{font-size:17px;line-height:1.43;opacity:.75;margin:0 0 22px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:20px}
+.card{padding:13px;border-radius:16px;background:#151515;border:1px solid #292929}
+.card b{display:block;font-size:11px;letter-spacing:.08em;opacity:.55;margin-bottom:5px}
+.card span{font-size:14px;line-height:1.25}
+.primary{height:58px;border-radius:18px;background:white;color:#090909;font-weight:750}
+#introStatus{font-size:12px;opacity:.66;min-height:40px;margin-top:12px}
+#camera{position:fixed;inset:0;background:#000;display:none}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+#ghost{position:absolute;z-index:2;height:64vh;max-width:72vw;object-fit:contain;left:50%;bottom:12vh;transform:translateX(-50%) rotate(-2deg);opacity:.28;filter:drop-shadow(0 0 10px rgba(255,255,255,.35));pointer-events:none;display:none;transition:opacity .2s}
+.glass{background:rgba(12,12,12,.60);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.16)}
+.topbar{position:absolute;z-index:8;left:12px;right:12px;top:calc(10px + var(--safeT));display:grid;grid-template-columns:72px 1fr 72px;gap:8px;align-items:center}
+.topbar button{height:40px;border-radius:13px}
+#state{text-align:center;font-size:11px;border-radius:13px;padding:10px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#scanPanel{position:absolute;z-index:7;left:14px;right:14px;bottom:calc(24px + var(--safeB));padding:14px;border-radius:20px}
+#scanPanel h2{font-size:19px;margin:0 0 6px;letter-spacing:-.02em}
+#scanPanel p{font-size:13px;line-height:1.35;opacity:.72;margin:0 0 12px}
+#scanBtn{height:52px;width:100%;border-radius:15px;background:#fff;color:#050505;font-weight:750}
+#scanProgress{font-size:11px;opacity:.65;margin-top:8px;min-height:16px}
+#coach{position:absolute;z-index:7;left:12px;right:12px;bottom:calc(16px + var(--safeB));display:none;grid-template-rows:auto auto;gap:9px}
+#sceneCard{border-radius:20px;padding:10px}
+.sceneHead{display:flex;justify-content:space-between;align-items:center;margin:0 2px 7px}
+.sceneHead span:first-child{font-size:11px;letter-spacing:.12em;opacity:.62}
+.sceneHead button{font-size:12px;padding:7px 10px;border-radius:11px;background:rgba(255,255,255,.10)}
+#stage{height:154px;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#242424,#111);border:1px solid rgba(255,255,255,.08)}
+#floor{position:absolute;left:-10%;right:-10%;bottom:20px;height:1px;background:rgba(255,255,255,.18);transform:perspective(240px) rotateX(66deg)}
+#shotFrame{position:absolute;left:18%;top:15%;width:58%;height:70%;border:1.5px solid rgba(255,255,255,.45);border-radius:6px;transition:.3s}
+#proxyShell{position:absolute;left:36%;bottom:17px;width:68px;height:122px;transform-origin:50% 95%}
+.proxyPart{position:absolute;inset:0;overflow:hidden}
+.proxyPart img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
+.proxyPart.upper{clip-path:inset(0 0 43% 0);transform-origin:50% 52%}
+.proxyPart.lower{clip-path:inset(50% 0 0 0);transform-origin:50% 55%}
+#phoneActor{position:absolute;right:13%;bottom:28px;width:31px;height:55px;border:2px solid rgba(255,255,255,.88);border-radius:8px;transform:rotate(-5deg)}
+#phoneActor:after{content:"";position:absolute;width:7px;height:7px;border:1px solid white;border-radius:50%;left:50%;top:7px;transform:translateX(-50%)}
+#movePath{position:absolute;right:10%;bottom:18px;font-size:10px;opacity:.58}
+#cueCard{border-radius:18px;padding:12px 12px 11px}
+.cueTop{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.actor{font-size:9px;letter-spacing:.13em;padding:4px 6px;border-radius:7px;background:rgba(255,255,255,.10);opacity:.75}
+#cueText{font-size:15px;line-height:1.28}
+#why{font-size:11px;opacity:.6;margin-top:5px}
+.coachActions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
+.coachActions button{height:42px;border-radius:12px;background:rgba(255,255,255,.10)}
+#shutter{position:absolute;z-index:6;right:18px;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35);box-shadow:inset 0 0 0 3px #111;display:none}
+#tip{position:absolute;z-index:6;left:50%;top:calc(60px + var(--safeT));transform:translateX(-50%);font-size:11px;padding:7px 10px;border-radius:999px;display:none;white-space:nowrap}
+</style>
+</head>
+<body>
+<section id="intro">
+  <div class="kicker">POSECOACH · SCENE COACH SPRINT</div>
+  <h1>Show the shot.<br>Don't describe it.</h1>
+  <p class="lede">This build uses the actual person in front of the camera as the visual guide. The subject and virtual phone move together so the photographer can see the intended shot.</p>
+  <div class="cards">
+    <div class="card"><b>1 · CAMERA</b><span>Put one full person in frame.</span></div>
+    <div class="card"><b>2 · SCAN</b><span>PoseCoach makes a temporary visual proxy.</span></div>
+    <div class="card"><b>3 · WATCH</b><span>Subject + camera animate together.</span></div>
+    <div class="card"><b>4 · MATCH</b><span>Use the translucent target in the live view.</span></div>
+  </div>
+  <button id="start" class="primary">Open camera</button>
+  <div id="introStatus">Models load only after you open the camera.</div>
+</section>
+
+<section id="camera">
+  <video id="video" autoplay playsinline muted></video>
+  <img id="ghost" alt="Personalized target pose guide">
+  <div id="tip" class="glass">Full body in frame</div>
+  <div class="topbar">
+    <button id="back" class="glass">‹</button>
+    <div id="state" class="glass">Camera</div>
+    <button id="flip" class="glass">Flip</button>
+  </div>
+  <div id="scanPanel" class="glass">
+    <h2>Create your Scene Coach</h2>
+    <p>Keep one person fully visible. PoseCoach will use this camera frame only to make the temporary visual guide.</p>
+    <button id="scanBtn">Scan this person</button>
+    <div id="scanProgress"></div>
+  </div>
+  <div id="coach">
+    <div id="sceneCard" class="glass">
+      <div class="sceneHead"><span>SCENE COACH</span><button id="replay">Replay motion</button></div>
+      <div id="stage">
+        <div id="shotFrame"></div>
+        <div id="floor"></div>
+        <div id="proxyShell">
+          <div class="proxyPart upper"><img id="proxyUpper"></div>
+          <div class="proxyPart lower"><img id="proxyLower"></div>
+        </div>
+        <div id="phoneActor"></div>
+        <div id="movePath">subject + camera</div>
+      </div>
+    </div>
+    <div id="cueCard" class="glass">
+      <div class="cueTop"><span class="actor">SUBJECT</span><span class="actor">PHOTOGRAPHER</span></div>
+      <div id="cueText"></div>
+      <div id="why"></div>
+      <div class="coachActions">
+        <button id="prev">‹ Prev</button>
+        <button id="ghostBtn">Ghost on</button>
+        <button id="next">Next ›</button>
+      </div>
+    </div>
+  </div>
+  <button id="shutter" aria-label="Take picture"></button>
+</section>
+
+<canvas id="scanCanvas" class="hidden"></canvas>
+<canvas id="maskCanvas" class="hidden"></canvas>
+<canvas id="cutoutCanvas" class="hidden"></canvas>
+<canvas id="cropCanvas" class="hidden"></canvas>
+
+<script type="module">
+import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+const MODEL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+const WASM="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
+const $=id=>document.getElementById(id);
+const intro=$("intro"),camera=$("camera"),video=$("video"),state=$("state");
+const scanPanel=$("scanPanel"),scanBtn=$("scanBtn"),scanProgress=$("scanProgress");
+const coach=$("coach"),ghost=$("ghost"),proxyUpper=$("proxyUpper"),proxyLower=$("proxyLower");
+const proxyShell=$("proxyShell"),phoneActor=$("phoneActor"),shotFrame=$("shotFrame");
+const scanCanvas=$("scanCanvas"),maskCanvas=$("maskCanvas"),cutoutCanvas=$("cutoutCanvas"),cropCanvas=$("cropCanvas");
+let stream=null,facing="environment",vision=null,imageLandmarker=null,step=0,ghostOn=true;
+
+const steps=[
+{cue:"Turn your chest a little away while the photographer lowers the phone.",why:"Body angle adds depth; lowering the camera changes the perspective at the same time.",subject:{shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(6px) rotate(-2deg)"}],upper:[{transform:"perspective(180px) rotateY(0deg)"},{transform:"perspective(180px) rotateY(14deg) rotateZ(-2deg)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(4px) rotate(1deg)"}]},camera:[{transform:"translate(0,0) rotate(-5deg)"},{transform:"translate(11px,12px) rotate(-2deg)"}],frame:[{transform:"scale(1) translate(0,0)"},{transform:"scale(.93) translate(-3px,5px)"}],ghost:"translateX(-48%) rotate(-2deg) perspective(600px) rotateY(7deg)"},
+{cue:"Shift most of your weight to the back leg while the photographer takes one step back.",why:"Your stance becomes less rigid while stepping back reduces wide-angle exaggeration.",subject:{shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(8px) rotate(2deg)"}],upper:[{transform:"translateX(0)"},{transform:"translateX(-2px) rotate(-1deg)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(7px) rotate(3deg)"}]},camera:[{transform:"translate(0,0) scale(1)"},{transform:"translate(13px,-2px) scale(.82)"}],frame:[{transform:"scale(1)"},{transform:"scale(.86)"}],ghost:"translateX(-46%) rotate(1deg)"},
+{cue:"Give the front hand a job near the pocket while the photographer shifts slightly toward your open shoulder.",why:"The hand stops floating and the camera sees more of the open side of the pose.",subject:{shell:[{transform:"translateX(0)"},{transform:"translateX(5px)"}],upper:[{transform:"rotate(0)"},{transform:"rotate(-3deg) translateY(2px)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(2px)"}]},camera:[{transform:"translate(0,0)"},{transform:"translate(-16px,0) rotate(-7deg)"}],frame:[{transform:"translate(0,0)"},{transform:"translate(-7px,0)"}],ghost:"translateX(-52%) rotate(-2deg)"}
+];
+
+function setStatus(t){state.textContent=t}
+function setCue(){const s=steps[step];$("cueText").textContent=s.cue;$("why").textContent=s.why;ghost.style.transform=s.ghost}
+
+async function openCamera(){
+ $("introStatus").textContent="Requesting camera…";
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
+  intro.style.display="none";camera.style.display="block";video.srcObject=stream;
+  try{await video.play()}catch(e){}
+  setStatus("Camera ready");$("tip").style.display="block";prepareVision();
+ }catch(e){$("introStatus").textContent="Camera failed: "+(e.name||"Error")+" · "+(e.message||"")}
+}
+
+async function prepareVision(){
+ if(imageLandmarker)return;
+ scanProgress.textContent="Loading on-device pose model…";
+ try{
+  vision=await FilesetResolver.forVisionTasks(WASM);
+  imageLandmarker=await PoseLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:MODEL},runningMode:"IMAGE",numPoses:1,minPoseDetectionConfidence:.45,minPosePresenceConfidence:.45,outputSegmentationMasks:true});
+  scanProgress.textContent="Ready to scan.";setStatus("Pose model ready");
+ }catch(e){scanProgress.textContent="Model load failed: "+(e.message||e);setStatus("Model unavailable")}
+}
+
+function drawVideoCover(canvas){
+ const vw=video.videoWidth,vh=video.videoHeight;if(!vw||!vh)throw new Error("Camera frame is not ready yet.");
+ const outW=480,outH=Math.round(outW*(innerHeight/innerWidth));canvas.width=outW;canvas.height=outH;
+ const ctx=canvas.getContext("2d"),srcAspect=vw/vh,dstAspect=outW/outH;let sx=0,sy=0,sw=vw,sh=vh;
+ if(srcAspect>dstAspect){sw=vh*dstAspect;sx=(vw-sw)/2}else{sh=vw/dstAspect;sy=(vh-sh)/2}
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,outW,outH);
+}
+
+function makeMask(mpMask){
+ const arr=mpMask.getAsFloat32Array(),w=mpMask.width,h=mpMask.height;maskCanvas.width=w;maskCanvas.height=h;
+ const mctx=maskCanvas.getContext("2d"),img=mctx.createImageData(w,h);
+ for(let i=0;i<arr.length;i++){const a=Math.max(0,Math.min(255,Math.round(arr[i]*255))),j=i*4;img.data[j]=255;img.data[j+1]=255;img.data[j+2]=255;img.data[j+3]=a}
+ mctx.putImageData(img,0,0);
+}
+
+function cropBounds(landmarks){
+ const visible=landmarks.filter(p=>(p.visibility??1)>.25);
+ if(!visible.length)return [0.08,0.05,0.92,0.96];
+ return [Math.max(0,Math.min(...visible.map(p=>p.x))-.09),Math.max(0,Math.min(...visible.map(p=>p.y))-.10),Math.min(1,Math.max(...visible.map(p=>p.x))+.09),Math.min(1,Math.max(...visible.map(p=>p.y))+.06)];
+}
+
+function makeCutout(landmarks){
+ cutoutCanvas.width=scanCanvas.width;cutoutCanvas.height=scanCanvas.height;const cctx=cutoutCanvas.getContext("2d");
+ cctx.clearRect(0,0,cutoutCanvas.width,cutoutCanvas.height);cctx.drawImage(scanCanvas,0,0);cctx.globalCompositeOperation="destination-in";cctx.drawImage(maskCanvas,0,0,cutoutCanvas.width,cutoutCanvas.height);cctx.globalCompositeOperation="source-over";
+ const [minX,minY,maxX,maxY]=cropBounds(landmarks),x=minX*cutoutCanvas.width,y=minY*cutoutCanvas.height,w=(maxX-minX)*cutoutCanvas.width,h=(maxY-minY)*cutoutCanvas.height;
+ cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));cropCanvas.getContext("2d").drawImage(cutoutCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
+ return cropCanvas.toDataURL("image/png");
+}
+
+function makePhotoFallback(landmarks){
+ const [minX,minY,maxX,maxY]=cropBounds(landmarks),x=minX*scanCanvas.width,y=minY*scanCanvas.height,w=(maxX-minX)*scanCanvas.width,h=(maxY-minY)*scanCanvas.height;
+ cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));cropCanvas.getContext("2d").drawImage(scanCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
+ return cropCanvas.toDataURL("image/jpeg",.9);
+}
+
+async function scanPerson(){
+ if(!imageLandmarker){scanProgress.textContent="Pose model is still loading…";return}
+ scanBtn.disabled=true;scanProgress.textContent="Scanning person…";
+ try{
+  drawVideoCover(scanCanvas);const result=imageLandmarker.detect(scanCanvas);
+  if(!result.landmarks?.length)throw new Error("I can't see one clear person. Step back so the full body is visible.");
+  let url=null;
+  if(result.segmentationMasks?.length){try{makeMask(result.segmentationMasks[0]);url=makeCutout(result.landmarks[0])}catch(e){console.warn(e)}}
+  if(!url)url=makePhotoFallback(result.landmarks[0]);
+  proxyUpper.src=url;proxyLower.src=url;ghost.src=url;ghost.style.display="block";
+  scanPanel.style.display="none";coach.style.display="grid";$("shutter").style.display="block";$("tip").style.display="none";
+  setCue();setStatus("Scene Coach ready");setTimeout(animateScene,250);
+ }catch(e){scanProgress.textContent=e.message||String(e);scanBtn.disabled=false;setStatus("Scan again")}
+}
+
+function animateScene(){
+ const s=steps[step],opt={duration:2100,easing:"cubic-bezier(.2,.75,.2,1)",fill:"forwards"};
+ [proxyShell,document.querySelector(".proxyPart.upper"),document.querySelector(".proxyPart.lower"),phoneActor,shotFrame].forEach(el=>el.getAnimations().forEach(a=>a.cancel()));
+ proxyShell.animate(s.subject.shell,opt);document.querySelector(".proxyPart.upper").animate(s.subject.upper,opt);document.querySelector(".proxyPart.lower").animate(s.subject.lower,opt);phoneActor.animate(s.camera,opt);shotFrame.animate(s.frame,opt);
+}
+function changeStep(delta){step=(step+delta+steps.length)%steps.length;setCue();animateScene()}
+
+$("start").addEventListener("click",openCamera);
+$("scanBtn").addEventListener("click",scanPerson);
+$("replay").addEventListener("click",animateScene);
+$("next").addEventListener("click",()=>changeStep(1));
+$("prev").addEventListener("click",()=>changeStep(-1));
+$("ghostBtn").addEventListener("click",e=>{ghostOn=!ghostOn;ghost.style.display=ghostOn?"block":"none";e.currentTarget.textContent=ghostOn?"Ghost on":"Ghost off"});
+$("flip").addEventListener("click",async()=>{if(stream)stream.getTracks().forEach(t=>t.stop());facing=facing==="environment"?"user":"environment";await openCamera()});
+$("back").addEventListener("click",()=>{if(stream)stream.getTracks().forEach(t=>t.stop());camera.style.display="none";intro.style.display="flex"});
+$("shutter").addEventListener("click",()=>setStatus("Capture comes after Scene Coach validation"));
+setCue();
+</script>
+</body>
+</html>
