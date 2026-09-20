@@ -117,7 +117,7 @@ h1{font-size:43px;line-height:.97;letter-spacing:-.045em;margin:0 0 16px}
 
   <div id="scanPanel" class="glass">
     <h2>Solo auto scan</h2>
-    <p>Tap once, then walk away. Let your gimbal track you. PoseCoach will wait until your full body is framed and stable before scanning.</p>
+    <p>Tap once, then walk away. Let your gimbal track you. PoseCoach watches the live frame and will speak if the gimbal crops you too tightly or loses your full body.</p>
     <div id="readyPanel">
       <div class="readyRow"><div id="readyDot"></div><div id="readyLabel">Not armed yet</div></div>
       <div id="readyHint">Tap “Scan when ready,” then take your time.</div>
@@ -182,6 +182,8 @@ let stream=null,facing="environment",vision=null,imageLandmarker=null;
 let readyWatchActive=false,readyRaf=0,lastPoseCheck=0,stableStart=0,lastStableSample=null;
 let scanComplete=false,step=0,ghostOn=true,coachSize=1;
 let voiceOn=false,voiceUnlocked=false,stableVoiceGiven=false,backgroundAdvice="",lastUtterance=null;
+let directorWatchActive=false,directorRaf=0,lastDirectorCheck=0,lastDirectorKey="",lastDirectorSpokenAt=0;
+let poseBaseline=null,stepStartedAt=0,stepGoodSince=0;
 
 const steps=[
  {
@@ -397,6 +399,7 @@ function isStable(sample){
 }
 
 function armAutoScan(){
+ stopDirector();
  if(!voiceUnlocked){
   voiceGate.style.display="block";
   voiceStatus.textContent="Enable and test Voice Director first so you can hear hands-free coaching.";
@@ -602,6 +605,168 @@ function analyzeBackground(lm){
  return "The background is reasonably clean. Keep a little distance between yourself and the background so you stand out from it.";
 }
 
+function stopDirector(){
+ directorWatchActive=false;
+ if(directorRaf)cancelAnimationFrame(directorRaf);
+ directorRaf=0;
+}
+
+function directorSay(key,text,{force=false,cooldown=5200}={}){
+ const now=performance.now();
+ if(!force && key===lastDirectorKey && now-lastDirectorSpokenAt<cooldown)return;
+ if(!force && window.speechSynthesis && speechSynthesis.speaking)return;
+
+ lastDirectorKey=key;
+ lastDirectorSpokenAt=now;
+ setStatus(text.length>42?text.slice(0,39)+"…":text);
+ speak(text,{interrupt:true});
+}
+
+function bodyMetrics(lm){
+ const shoulderWidth=Math.abs(lm[12].x-lm[11].x);
+ const hipWidth=Math.abs(lm[24].x-lm[23].x);
+ const bodyTop=lm[0].y;
+ const bodyBottom=Math.max(lm[27].y,lm[28].y);
+ const bodyHeight=bodyBottom-bodyTop;
+ const centerX=((lm[11].x+lm[12].x+lm[23].x+lm[24].x)/4);
+ const centerY=((lm[11].y+lm[12].y+lm[23].y+lm[24].y)/4);
+ const leftWristHip=Math.hypot(lm[15].x-lm[23].x,lm[15].y-lm[23].y);
+ const rightWristHip=Math.hypot(lm[16].x-lm[24].x,lm[16].y-lm[24].y);
+ const ankleSpread=Math.abs(lm[28].x-lm[27].x);
+ return {shoulderWidth,hipWidth,bodyTop,bodyBottom,bodyHeight,centerX,centerY,leftWristHip,rightWristHip,ankleSpread};
+}
+
+function framingCorrection(lm){
+ const required=[0,11,12,23,24,25,26,27,28];
+ const vis=required.map(i=>lm[i]?.visibility??0);
+ const lowerVisible=[25,26,27,28].every(i=>(lm[i]?.visibility??0)>.33);
+ const headVisible=(lm[0]?.visibility??0)>.35;
+
+ if(!headVisible)return {key:"head_missing",text:"I lost your head. Move fully into the frame and let the gimbal settle."};
+
+ if(!lowerVisible){
+  return {key:"upper_only",text:"I am only getting your upper body. Take two small steps back and let the gimbal follow until I can see you head to toe."};
+ }
+
+ const m=bodyMetrics(lm);
+ if(m.bodyBottom>.97 || m.bodyTop<.025 || m.bodyHeight>.91){
+  return {key:"too_tight",text:"The frame is too tight. Take one or two small steps back and let the gimbal keep tracking you."};
+ }
+ if(m.bodyHeight<.42){
+  return {key:"too_far",text:"You are a little too small in frame. Take one small step closer and let the gimbal settle."};
+ }
+ if(m.centerX<.34){
+  return {key:"too_left",text:"You are sitting too far left in the frame. Move slightly right and let the gimbal follow."};
+ }
+ if(m.centerX>.66){
+  return {key:"too_right",text:"You are sitting too far right in the frame. Move slightly left and let the gimbal follow."};
+ }
+ return null;
+}
+
+function poseStepSatisfied(lm){
+ if(!poseBaseline)return false;
+ const m=bodyMetrics(lm);
+
+ if(step===0){
+  // A quarter turn usually reduces apparent shoulder width from the square-on baseline.
+  return m.shoulderWidth < poseBaseline.shoulderWidth*.92;
+ }
+
+ if(step===1){
+  // Weight distribution is not directly observable; use a stable asymmetry proxy, then time-gate.
+  const hipCenter=(lm[23].x+lm[24].x)/2;
+  const ankleCenter=(lm[27].x+lm[28].x)/2;
+  return Math.abs(hipCenter-ankleCenter)>.018 || performance.now()-stepStartedAt>6500;
+ }
+
+ if(step===2){
+  // Either wrist near the corresponding hip/pocket area is observable.
+  return Math.min(m.leftWristHip,m.rightWristHip)<.16;
+ }
+
+ return false;
+}
+
+function advanceDirectorStep(){
+ if(step<steps.length-1){
+  step++;
+  stepStartedAt=performance.now();
+  stepGoodSince=0;
+  setCue();
+  animateScene();
+  const s=steps[step];
+  directorSay("step_"+step,"Good. Next: "+s.subject+" "+s.camera,{force:true});
+ }else{
+  stepGoodSince=0;
+  directorSay("final_hold","That works. Hold that pose. Keep your eyes relaxed and stay still for the shot.",{force:true,cooldown:9000});
+ }
+}
+
+function startDirector(){
+ if(directorWatchActive || !scanComplete)return;
+ directorWatchActive=true;
+ lastDirectorCheck=0;
+ stepStartedAt=performance.now();
+ stepGoodSince=0;
+
+ const loop=()=>{
+  if(!directorWatchActive || !scanComplete)return;
+  const now=performance.now();
+
+  if(video.readyState>=2 && now-lastDirectorCheck>=720){
+   lastDirectorCheck=now;
+   try{
+    drawVideoCover(scanCanvas);
+    const result=imageLandmarker.detect(scanCanvas);
+    const lm=result.landmarks?.[0];
+
+    if(!lm){
+     directorSay("lost_subject","I lost you. Step back into view and let the gimbal find you again.");
+    }else{
+     const frameIssue=framingCorrection(lm);
+
+     if(frameIssue){
+      stepGoodSince=0;
+      directorSay(frameIssue.key,frameIssue.text);
+     }else{
+      const m=bodyMetrics(lm);
+
+      // Keep the visual background note current, but don't chatter unless the pose/frame is good.
+      if(now-lastDirectorSpokenAt>8500){
+       backgroundAdvice=analyzeBackground(lm);
+       $("backgroundText").textContent=backgroundAdvice;
+      }
+
+      if(poseStepSatisfied(lm)){
+       if(!stepGoodSince)stepGoodSince=now;
+       if(now-stepGoodSince>1200){
+        advanceDirectorStep();
+       }
+      }else{
+       stepGoodSince=0;
+       if(now-stepStartedAt>5200){
+        const s=steps[step];
+        directorSay("remind_step_"+step,s.subject+" "+s.camera,{cooldown:6500});
+       }
+      }
+
+      // If framing is good and the current correction has been quiet for a while, offer one background cue.
+      if(now-lastDirectorSpokenAt>11000 && backgroundAdvice){
+       directorSay("background_"+step,backgroundAdvice,{cooldown:12000});
+      }
+     }
+    }
+   }catch(e){
+    console.warn("Live Director check failed",e);
+   }
+  }
+
+  directorRaf=requestAnimationFrame(loop);
+ };
+ directorRaf=requestAnimationFrame(loop);
+}
+
 async function scanPerson(autoTriggered=false){
  if(!imageLandmarker){scanProgress.textContent="Pose model is still loading…";return}
  stopReadyWatcher();
@@ -622,12 +787,19 @@ async function scanPerson(autoTriggered=false){
   if(!url)url=makePhotoFallback(lm);
 
   backgroundAdvice=analyzeBackground(lm);
+  poseBaseline=bodyMetrics(lm);
+  step=0;
+  stepStartedAt=performance.now();
   proxyWhole.src=url;ghost.src=url;ghost.style.display="block";
   scanComplete=true;
   scanPanel.style.display="none";coach.style.display="grid";$("shutter").style.display="block";$("tip").style.display="none";
   setCue();
   setStatus("Voice Director ready");
-  setTimeout(()=>{animateScene();speak("Great, I have you. "+combinedInstruction())},300);
+  setTimeout(()=>{
+   animateScene();
+   directorSay("initial_pose","Great, I have you. "+combinedInstruction(),{force:true});
+   setTimeout(startDirector,900);
+  },300);
  }catch(e){
   scanProgress.textContent=e.message||String(e);
   scanBtn.disabled=false;
@@ -649,6 +821,8 @@ function animateScene(){
 
 function changeStep(delta){
  step=(step+delta+steps.length)%steps.length;
+ stepStartedAt=performance.now();
+ stepGoodSince=0;
  setCue({speakNow:true});
  animateScene();
 }
@@ -700,6 +874,7 @@ $("minBtn").addEventListener("click",()=>{
 });
 
 $("flip").addEventListener("click",async()=>{
+ stopDirector();
  stopReadyWatcher();
  if(stream)stream.getTracks().forEach(t=>t.stop());
  facing=facing==="environment"?"user":"environment";
@@ -707,6 +882,7 @@ $("flip").addEventListener("click",async()=>{
 });
 
 $("back").addEventListener("click",()=>{
+ stopDirector();
  stopReadyWatcher();
  if(stream)stream.getTracks().forEach(t=>t.stop());
  if(window.speechSynthesis)speechSynthesis.cancel();
