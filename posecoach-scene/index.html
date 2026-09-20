@@ -32,7 +32,17 @@ h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
 #scanPanel h2{font-size:19px;margin:0 0 6px;letter-spacing:-.02em}
 #scanPanel p{font-size:13px;line-height:1.35;opacity:.72;margin:0 0 12px}
 #scanBtn{height:52px;width:100%;border-radius:15px;background:#fff;color:#050505;font-weight:750}
-#scanProgress{font-size:11px;opacity:.65;margin-top:8px;min-height:16px}
+#scanProgress{font-size:11px;opacity:.72;margin-top:8px;min-height:18px}
+#palmReady{margin:10px 0 11px;padding:11px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)}
+.palmRow{display:flex;align-items:center;gap:9px}
+#palmDot{width:12px;height:12px;border-radius:50%;background:#666;box-shadow:0 0 0 0 rgba(255,255,255,0);transition:.2s}
+#palmDot.detected{background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.12)}
+#palmDot.armed{background:#fff;box-shadow:0 0 0 9px rgba(255,255,255,.18)}
+#palmLabel{font-size:13px;font-weight:650}
+#palmHint{font-size:11px;opacity:.62;margin-top:4px;margin-left:21px;line-height:1.3}
+#palmTrack{height:3px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:9px}
+#palmFill{height:100%;width:0%;background:#fff;transition:width .08s linear}
+#scanBtn{height:44px;width:100%;border-radius:13px;background:rgba(255,255,255,.10);color:#fff;font-weight:650}
 #coach{position:absolute;z-index:7;left:12px;right:12px;bottom:calc(16px + var(--safeB));display:none;grid-template-rows:auto auto;gap:9px}
 #sceneCard{border-radius:20px;padding:10px}
 .sceneHead{display:flex;justify-content:space-between;align-items:center;margin:0 2px 7px}
@@ -85,10 +95,18 @@ h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
     <button id="flip" class="glass">Flip</button>
   </div>
   <div id="scanPanel" class="glass">
-    <h2>Create your Scene Coach</h2>
-    <p>Keep one person fully visible. PoseCoach will use this camera frame only to make the temporary visual guide.</p>
-    <button id="scanBtn">Scan this person</button>
-    <div id="scanProgress"></div>
+    <h2>Solo scan</h2>
+    <p>Walk into position at your own pace. When your full body is framed, face the camera and show one open palm.</p>
+    <div id="palmReady">
+      <div class="palmRow">
+        <div id="palmDot"></div>
+        <div id="palmLabel">Waiting for your palm</div>
+      </div>
+      <div id="palmHint">Show your palm when you are ready. Hold it briefly, then lower it to trigger the scan.</div>
+      <div id="palmTrack"><div id="palmFill"></div></div>
+    </div>
+    <button id="scanBtn">Scan now instead</button>
+    <div id="scanProgress">Loading solo controls…</div>
   </div>
   <div id="coach">
     <div id="sceneCard" class="glass">
@@ -124,16 +142,19 @@ h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
 <canvas id="cropCanvas" class="hidden"></canvas>
 
 <script type="module">
-import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+import { PoseLandmarker, GestureRecognizer, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
 const MODEL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+const GESTURE_MODEL="https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task";
 const WASM="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
 const $=id=>document.getElementById(id);
 const intro=$("intro"),camera=$("camera"),video=$("video"),state=$("state");
 const scanPanel=$("scanPanel"),scanBtn=$("scanBtn"),scanProgress=$("scanProgress");
+const palmDot=$("palmDot"),palmLabel=$("palmLabel"),palmHint=$("palmHint"),palmFill=$("palmFill");
 const coach=$("coach"),ghost=$("ghost"),proxyUpper=$("proxyUpper"),proxyLower=$("proxyLower");
 const proxyShell=$("proxyShell"),phoneActor=$("phoneActor"),shotFrame=$("shotFrame");
 const scanCanvas=$("scanCanvas"),maskCanvas=$("maskCanvas"),cutoutCanvas=$("cutoutCanvas"),cropCanvas=$("cropCanvas");
-let stream=null,facing="environment",vision=null,imageLandmarker=null,step=0,ghostOn=true;
+let stream=null,facing="environment",vision=null,imageLandmarker=null,gestureRecognizer=null,step=0,ghostOn=true;
+let palmWatchActive=false,palmRaf=0,lastGestureCheck=0,lastReadyCheck=0,palmState="waiting",palmHoldStart=0,palmLostStart=0,scanComplete=false;
 
 const steps=[
 {cue:"Turn your chest a little away while the photographer lowers the phone.",why:"Body angle adds depth; lowering the camera changes the perspective at the same time.",subject:{shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(6px) rotate(-2deg)"}],upper:[{transform:"perspective(180px) rotateY(0deg)"},{transform:"perspective(180px) rotateY(14deg) rotateZ(-2deg)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(4px) rotate(1deg)"}]},camera:[{transform:"translate(0,0) rotate(-5deg)"},{transform:"translate(11px,12px) rotate(-2deg)"}],frame:[{transform:"scale(1) translate(0,0)"},{transform:"scale(.93) translate(-3px,5px)"}],ghost:"translateX(-48%) rotate(-2deg) perspective(600px) rotateY(7deg)"},
@@ -150,18 +171,185 @@ async function openCamera(){
   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
   intro.style.display="none";camera.style.display="block";video.srcObject=stream;
   try{await video.play()}catch(e){}
+  scanComplete=false;resetPalmUI();
   setStatus("Camera ready");$("tip").style.display="block";prepareVision();
  }catch(e){$("introStatus").textContent="Camera failed: "+(e.name||"Error")+" · "+(e.message||"")}
 }
 
 async function prepareVision(){
- if(imageLandmarker)return;
- scanProgress.textContent="Loading on-device pose model…";
+ scanBtn.disabled=true;
+ scanProgress.textContent="Loading pose + palm recognition…";
  try{
-  vision=await FilesetResolver.forVisionTasks(WASM);
-  imageLandmarker=await PoseLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:MODEL},runningMode:"IMAGE",numPoses:1,minPoseDetectionConfidence:.45,minPosePresenceConfidence:.45,outputSegmentationMasks:true});
-  scanProgress.textContent="Ready to scan.";setStatus("Pose model ready");
- }catch(e){scanProgress.textContent="Model load failed: "+(e.message||e);setStatus("Model unavailable")}
+  if(!vision)vision=await FilesetResolver.forVisionTasks(WASM);
+  if(!imageLandmarker){
+   imageLandmarker=await PoseLandmarker.createFromOptions(vision,{
+    baseOptions:{modelAssetPath:MODEL},
+    runningMode:"IMAGE",
+    numPoses:1,
+    minPoseDetectionConfidence:.45,
+    minPosePresenceConfidence:.45,
+    outputSegmentationMasks:true
+   });
+  }
+ }catch(e){
+  scanProgress.textContent="Pose model failed to load: "+(e.message||e);
+  setStatus("Pose model unavailable");
+  scanBtn.disabled=false;
+  return;
+ }
+ try{
+  if(!gestureRecognizer){
+   gestureRecognizer=await GestureRecognizer.createFromOptions(vision,{
+    baseOptions:{modelAssetPath:GESTURE_MODEL},
+    runningMode:"VIDEO",
+    numHands:1,
+    minHandDetectionConfidence:.45,
+    minHandPresenceConfidence:.45,
+    minTrackingConfidence:.45
+   });
+  }
+  scanProgress.textContent="Ready. Walk into position and show your open palm.";
+  setStatus("Palm ready");
+  scanBtn.disabled=false;
+  startPalmWatcher();
+ }catch(e){
+  console.warn("Palm model unavailable",e);
+  scanProgress.textContent="Palm recognition is unavailable on this device. Use “Scan now instead.”";
+  setStatus("Manual scan ready");
+  scanBtn.disabled=false;
+ }
+}
+
+function resetPalmUI(message="Waiting for your palm"){
+ palmState="waiting";
+ palmHoldStart=0;
+ palmLostStart=0;
+ palmDot.className="";
+ palmFill.style.width="0%";
+ palmLabel.textContent=message;
+ palmHint.textContent="Show your palm when you are ready. Hold it briefly, then lower it to trigger the scan.";
+}
+
+function stopPalmWatcher(){
+ palmWatchActive=false;
+ if(palmRaf)cancelAnimationFrame(palmRaf);
+ palmRaf=0;
+}
+
+function fullBodyReadiness(){
+ if(!imageLandmarker)return {ok:false,message:"Pose model is not ready yet."};
+ try{
+  drawVideoCover(scanCanvas);
+  const result=imageLandmarker.detect(scanCanvas);
+  const lm=result.landmarks?.[0];
+  if(!lm)return {ok:false,message:"I can’t see one full person yet."};
+
+  const required=[0,11,12,23,24,25,26,27,28];
+  const visible=required.every(i=>lm[i] && (lm[i].visibility??1)>.35);
+  if(!visible)return {ok:false,message:"Palm seen — step back until your head, torso, knees and ankles are visible."};
+
+  const xs=required.map(i=>lm[i].x),ys=required.map(i=>lm[i].y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const height=maxY-minY;
+
+  if(minX<.025 || maxX>.975 || minY<.025 || maxY>.975)
+   return {ok:false,message:"Palm seen — step back a little so your whole body has space around it."};
+  if(height<.34)
+   return {ok:false,message:"You are fully visible, but very far away. Move a little closer and show your palm again."};
+
+  return {ok:true,message:"Full body framed"};
+ }catch(e){
+  console.warn("Readiness check failed",e);
+  return {ok:false,message:"Hold your position and show your palm again."};
+ }
+}
+
+function handlePalm(openPalm,score,now){
+ if(scanComplete)return;
+
+ if(palmState==="waiting"){
+  if(!openPalm)return;
+  if(now-lastReadyCheck<550)return;
+  lastReadyCheck=now;
+
+  const ready=fullBodyReadiness();
+  if(!ready.ok){
+   palmDot.className="detected";
+   palmLabel.textContent="Palm detected";
+   palmHint.textContent=ready.message;
+   palmFill.style.width="0%";
+   return;
+  }
+
+  palmState="holding";
+  palmHoldStart=now;
+  palmDot.className="detected";
+  palmLabel.textContent="Palm detected · hold steady";
+  palmHint.textContent="Framing looks good. Keep your palm up for a moment.";
+  palmFill.style.width="4%";
+  return;
+ }
+
+ if(palmState==="holding"){
+  if(!openPalm){
+   resetPalmUI("Palm lost — show it again when ready");
+   return;
+  }
+  const progress=Math.min(1,(now-palmHoldStart)/800);
+  palmFill.style.width=Math.round(progress*100)+"%";
+  if(progress>=1){
+   palmState="armed";
+   palmDot.className="armed";
+   palmLabel.textContent="Ready ✓";
+   palmHint.textContent="Lower your hand. PoseCoach will scan after you settle.";
+   palmFill.style.width="100%";
+   setStatus("Lower palm to scan");
+  }
+  return;
+ }
+
+ if(palmState==="armed"){
+  if(openPalm){
+   palmLostStart=0;
+   return;
+  }
+  if(!palmLostStart)palmLostStart=now;
+  if(now-palmLostStart>=350){
+   palmState="settling";
+   palmLabel.textContent="Hold still…";
+   palmHint.textContent="Capturing your initial scan pose.";
+   palmFill.style.width="100%";
+   setStatus("Scanning");
+   stopPalmWatcher();
+   setTimeout(()=>scanPerson(true),450);
+  }
+ }
+}
+
+function startPalmWatcher(){
+ if(!gestureRecognizer || palmWatchActive || scanComplete)return;
+ palmWatchActive=true;
+ lastGestureCheck=0;
+
+ const loop=()=>{
+  if(!palmWatchActive || scanComplete)return;
+  const now=performance.now();
+
+  if(video.readyState>=2 && now-lastGestureCheck>=140){
+   lastGestureCheck=now;
+   try{
+    const result=gestureRecognizer.recognizeForVideo(video,now);
+    const top=result.gestures?.[0]?.[0];
+    const openPalm=!!top && top.categoryName==="Open_Palm" && top.score>=.52;
+    handlePalm(openPalm,top?.score||0,now);
+   }catch(e){
+    console.warn("Gesture frame failed",e);
+   }
+  }
+
+  palmRaf=requestAnimationFrame(loop);
+ };
+ palmRaf=requestAnimationFrame(loop);
 }
 
 function drawVideoCover(canvas){
@@ -199,19 +387,54 @@ function makePhotoFallback(landmarks){
  return cropCanvas.toDataURL("image/jpeg",.9);
 }
 
-async function scanPerson(){
- if(!imageLandmarker){scanProgress.textContent="Pose model is still loading…";return}
- scanBtn.disabled=true;scanProgress.textContent="Scanning person…";
+async function scanPerson(autoTriggered=false){
+ if(!imageLandmarker){
+  scanProgress.textContent="Pose model is still loading…";
+  if(autoTriggered){resetPalmUI();startPalmWatcher();}
+  return;
+ }
+ stopPalmWatcher();
+ scanBtn.disabled=true;
+ scanProgress.textContent=autoTriggered?"Palm trigger accepted · scanning…":"Scanning person…";
  try{
-  drawVideoCover(scanCanvas);const result=imageLandmarker.detect(scanCanvas);
-  if(!result.landmarks?.length)throw new Error("I can't see one clear person. Step back so the full body is visible.");
+  drawVideoCover(scanCanvas);
+  const result=imageLandmarker.detect(scanCanvas);
+  if(!result.landmarks?.length)throw new Error("I can’t see one clear person. Step back so your full body is visible.");
+
+  const ready=fullBodyReadinessFromLandmarks(result.landmarks[0]);
+  if(!ready.ok)throw new Error(ready.message);
+
   let url=null;
-  if(result.segmentationMasks?.length){try{makeMask(result.segmentationMasks[0]);url=makeCutout(result.landmarks[0])}catch(e){console.warn(e)}}
+  if(result.segmentationMasks?.length){
+   try{makeMask(result.segmentationMasks[0]);url=makeCutout(result.landmarks[0])}
+   catch(e){console.warn(e)}
+  }
   if(!url)url=makePhotoFallback(result.landmarks[0]);
+
+  scanComplete=true;
   proxyUpper.src=url;proxyLower.src=url;ghost.src=url;ghost.style.display="block";
   scanPanel.style.display="none";coach.style.display="grid";$("shutter").style.display="block";$("tip").style.display="none";
   setCue();setStatus("Scene Coach ready");setTimeout(animateScene,250);
- }catch(e){scanProgress.textContent=e.message||String(e);scanBtn.disabled=false;setStatus("Scan again")}
+ }catch(e){
+  scanProgress.textContent=e.message||String(e);
+  scanBtn.disabled=false;
+  setStatus("Ready to try again");
+  if(autoTriggered){
+   resetPalmUI("Scan missed — show your palm to retry");
+   setTimeout(startPalmWatcher,350);
+  }
+ }
+}
+
+function fullBodyReadinessFromLandmarks(lm){
+ const required=[0,11,12,23,24,25,26,27,28];
+ const visible=required.every(i=>lm[i] && (lm[i].visibility??1)>.35);
+ if(!visible)return {ok:false,message:"Step back until your head, torso, knees and ankles are all visible."};
+ const xs=required.map(i=>lm[i].x),ys=required.map(i=>lm[i].y);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ if(minX<.025 || maxX>.975 || minY<.025 || maxY>.975)
+  return {ok:false,message:"Give yourself a little more space around the edges of the frame."};
+ return {ok:true};
 }
 
 function animateScene(){
@@ -222,13 +445,22 @@ function animateScene(){
 function changeStep(delta){step=(step+delta+steps.length)%steps.length;setCue();animateScene()}
 
 $("start").addEventListener("click",openCamera);
-$("scanBtn").addEventListener("click",scanPerson);
+$("scanBtn").addEventListener("click",()=>scanPerson(false));
 $("replay").addEventListener("click",animateScene);
 $("next").addEventListener("click",()=>changeStep(1));
 $("prev").addEventListener("click",()=>changeStep(-1));
 $("ghostBtn").addEventListener("click",e=>{ghostOn=!ghostOn;ghost.style.display=ghostOn?"block":"none";e.currentTarget.textContent=ghostOn?"Ghost on":"Ghost off"});
-$("flip").addEventListener("click",async()=>{if(stream)stream.getTracks().forEach(t=>t.stop());facing=facing==="environment"?"user":"environment";await openCamera()});
-$("back").addEventListener("click",()=>{if(stream)stream.getTracks().forEach(t=>t.stop());camera.style.display="none";intro.style.display="flex"});
+$("flip").addEventListener("click",async()=>{
+ stopPalmWatcher();
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ facing=facing==="environment"?"user":"environment";
+ await openCamera();
+});
+$("back").addEventListener("click",()=>{
+ stopPalmWatcher();
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ camera.style.display="none";intro.style.display="flex";
+});
 $("shutter").addEventListener("click",()=>setStatus("Capture comes after Scene Coach validation"));
 setCue();
 </script>
