@@ -4,127 +4,138 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#050505">
-<title>PoseCoach Scene Coach</title>
+<title>PoseCoach — Voice Director</title>
 <style>
 :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;--safeT:env(safe-area-inset-top);--safeB:env(safe-area-inset-bottom)}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;background:#050505;color:white;overflow:hidden}
+html,body{margin:0;width:100%;height:100%;background:#050505;color:#fff;overflow:hidden}
 button{font:inherit;color:inherit;border:0}
 .hidden{display:none!important}
-#intro{height:100svh;padding:calc(36px + var(--safeT)) 22px calc(26px + var(--safeB));display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 50% 12%,#262626,#070707 52%)}
-.kicker{font-size:11px;letter-spacing:.17em;opacity:.58;margin-bottom:10px}
-h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
-.lede{font-size:17px;line-height:1.43;opacity:.75;margin:0 0 22px}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:20px}
-.card{padding:13px;border-radius:16px;background:#151515;border:1px solid #292929}
-.card b{display:block;font-size:11px;letter-spacing:.08em;opacity:.55;margin-bottom:5px}
-.card span{font-size:14px;line-height:1.25}
-.primary{height:58px;border-radius:18px;background:white;color:#090909;font-weight:750}
-#introStatus{font-size:12px;opacity:.66;min-height:40px;margin-top:12px}
+.glass{background:rgba(12,12,12,.42);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.14)}
+#intro{height:100svh;padding:calc(34px + var(--safeT)) 22px calc(26px + var(--safeB));display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 50% 12%,#282828,#070707 53%)}
+.kicker{font-size:11px;letter-spacing:.17em;opacity:.6;margin-bottom:10px}
+h1{font-size:43px;line-height:.97;letter-spacing:-.045em;margin:0 0 16px}
+.lede{font-size:17px;line-height:1.42;opacity:.77;margin:0 0 20px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px}
+.card{padding:12px;border-radius:15px;background:#151515;border:1px solid #292929}
+.card b{display:block;font-size:10px;letter-spacing:.1em;opacity:.58;margin-bottom:5px}
+.card span{font-size:13px;line-height:1.25}
+.primary{height:56px;border-radius:17px;background:#fff;color:#080808;font-weight:750}
+#introStatus{font-size:12px;opacity:.68;min-height:36px;margin-top:11px}
+
 #camera{position:fixed;inset:0;background:#000;display:none}
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
-#ghost{position:absolute;z-index:2;height:64vh;max-width:72vw;object-fit:contain;left:50%;bottom:12vh;transform:translateX(-50%) rotate(-2deg);opacity:.28;filter:drop-shadow(0 0 10px rgba(255,255,255,.35));pointer-events:none;display:none;transition:opacity .2s}
-.glass{background:rgba(12,12,12,.60);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.16)}
-.topbar{position:absolute;z-index:8;left:12px;right:12px;top:calc(10px + var(--safeT));display:grid;grid-template-columns:72px 1fr 72px;gap:8px;align-items:center}
-.topbar button{height:40px;border-radius:13px}
-#state{text-align:center;font-size:11px;border-radius:13px;padding:10px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#scanPanel{position:absolute;z-index:7;left:14px;right:14px;bottom:calc(24px + var(--safeB));padding:14px;border-radius:20px}
-#scanPanel h2{font-size:19px;margin:0 0 6px;letter-spacing:-.02em}
-#scanPanel p{font-size:13px;line-height:1.35;opacity:.72;margin:0 0 12px}
-#scanBtn{height:52px;width:100%;border-radius:15px;background:#fff;color:#050505;font-weight:750}
-#scanProgress{font-size:11px;opacity:.72;margin-top:8px;min-height:18px}
-#palmReady{margin:10px 0 11px;padding:11px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)}
-.palmRow{display:flex;align-items:center;gap:9px}
-#palmDot{width:12px;height:12px;border-radius:50%;background:#666;box-shadow:0 0 0 0 rgba(255,255,255,0);transition:.2s}
-#palmDot.detected{background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.12)}
-#palmDot.armed{background:#fff;box-shadow:0 0 0 9px rgba(255,255,255,.18)}
-#palmLabel{font-size:13px;font-weight:650}
-#palmHint{font-size:11px;opacity:.62;margin-top:4px;margin-left:21px;line-height:1.3}
-#palmTrack{height:3px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:9px}
-#palmFill{height:100%;width:0%;background:#fff;transition:width .08s linear}
-#scanBtn{height:44px;width:100%;border-radius:13px;background:rgba(255,255,255,.10);color:#fff;font-weight:650}
-#coach{position:absolute;z-index:7;left:12px;right:12px;bottom:calc(16px + var(--safeB));display:none;grid-template-rows:auto auto;gap:9px}
-#sceneCard{border-radius:20px;padding:10px}
-.sceneHead{display:flex;justify-content:space-between;align-items:center;margin:0 2px 7px}
-.sceneHead span:first-child{font-size:11px;letter-spacing:.12em;opacity:.62}
-.sceneHead button{font-size:12px;padding:7px 10px;border-radius:11px;background:rgba(255,255,255,.10)}
-#stage{height:154px;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#242424,#111);border:1px solid rgba(255,255,255,.08)}
+#ghost{position:absolute;z-index:2;max-height:69vh;max-width:80vw;width:auto;height:auto;object-fit:contain;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.29;filter:drop-shadow(0 0 10px rgba(255,255,255,.35));pointer-events:none;display:none;transition:opacity .2s,transform .35s}
+
+.topbar{position:absolute;z-index:10;left:10px;right:10px;top:calc(8px + var(--safeT));display:grid;grid-template-columns:55px 1fr 72px 68px;gap:7px;align-items:center}
+.topbar button,#state{height:40px;border-radius:13px}
+#state{display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#voiceBtn{font-size:11px}
+#tip{position:absolute;z-index:5;left:50%;top:calc(56px + var(--safeT));transform:translateX(-50%);font-size:11px;padding:7px 10px;border-radius:999px;display:none;white-space:nowrap}
+
+#scanPanel{position:absolute;z-index:8;left:13px;right:13px;bottom:calc(18px + var(--safeB));padding:14px;border-radius:20px}
+#scanPanel h2{font-size:19px;margin:0 0 5px}
+#scanPanel p{font-size:13px;line-height:1.35;opacity:.73;margin:0 0 10px}
+#readyPanel{padding:11px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);margin-bottom:10px}
+.readyRow{display:flex;align-items:center;gap:9px}
+#readyDot{width:12px;height:12px;border-radius:50%;background:#666;transition:.2s}
+#readyDot.seen{background:#bbb;box-shadow:0 0 0 5px rgba(255,255,255,.08)}
+#readyDot.stable{background:#fff;box-shadow:0 0 0 8px rgba(255,255,255,.16)}
+#readyLabel{font-size:13px;font-weight:650}
+#readyHint{font-size:11px;line-height:1.3;opacity:.64;margin:4px 0 0 21px}
+#readyTrack{height:3px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:9px}
+#readyFill{height:100%;width:0;background:#fff;transition:width .12s linear}
+#scanBtn{height:49px;width:100%;border-radius:14px;background:#fff;color:#090909;font-weight:720}
+#scanProgress{font-size:11px;opacity:.68;min-height:16px;margin-top:8px}
+
+#coach{position:absolute;z-index:8;left:11px;right:11px;bottom:calc(13px + var(--safeB));display:none;grid-template-rows:auto auto;gap:8px}
+#sceneCard,#cueCard{border-radius:19px}
+#sceneCard{padding:9px}
+.sceneHead{display:flex;align-items:center;gap:6px;margin:0 2px 7px}
+.sceneHead .title{font-size:10px;letter-spacing:.13em;opacity:.62;margin-right:auto}
+.sceneHead button{font-size:10px;padding:7px 8px;border-radius:10px;background:rgba(255,255,255,.09)}
+#stage{height:148px;position:relative;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#242424,#111);border:1px solid rgba(255,255,255,.08)}
+#shotFrame{position:absolute;left:18%;top:15%;width:58%;height:70%;border:1.5px solid rgba(255,255,255,.44);border-radius:6px}
 #floor{position:absolute;left:-10%;right:-10%;bottom:20px;height:1px;background:rgba(255,255,255,.18);transform:perspective(240px) rotateX(66deg)}
-#shotFrame{position:absolute;left:18%;top:15%;width:58%;height:70%;border:1.5px solid rgba(255,255,255,.45);border-radius:6px;transition:.3s}
-#proxyShell{position:absolute;left:36%;bottom:17px;width:68px;height:122px;transform-origin:50% 95%}
-.proxyPart{position:absolute;inset:0;overflow:hidden}
-.proxyPart img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
-.proxyPart.upper{clip-path:inset(0 0 43% 0);transform-origin:50% 52%}
-.proxyPart.lower{clip-path:inset(50% 0 0 0);transform-origin:50% 55%}
-#phoneActor{position:absolute;right:13%;bottom:28px;width:31px;height:55px;border:2px solid rgba(255,255,255,.88);border-radius:8px;transform:rotate(-5deg)}
+#proxyShell{position:absolute;left:36%;bottom:15px;width:74px;height:124px;transform-origin:50% 95%}
+#proxyWhole{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45))}
+#phoneActor{position:absolute;right:13%;bottom:27px;width:31px;height:55px;border:2px solid rgba(255,255,255,.88);border-radius:8px;transform:rotate(-5deg)}
 #phoneActor:after{content:"";position:absolute;width:7px;height:7px;border:1px solid white;border-radius:50%;left:50%;top:7px;transform:translateX(-50%)}
-#movePath{position:absolute;right:10%;bottom:18px;font-size:10px;opacity:.58}
-#cueCard{border-radius:18px;padding:12px 12px 11px}
-.cueTop{display:flex;align-items:center;gap:7px;margin-bottom:6px}
-.actor{font-size:9px;letter-spacing:.13em;padding:4px 6px;border-radius:7px;background:rgba(255,255,255,.10);opacity:.75}
+#cueCard{padding:11px 12px;transition:opacity .25s}
+.cueTop{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.actor{font-size:9px;letter-spacing:.12em;padding:4px 6px;border-radius:7px;background:rgba(255,255,255,.10);opacity:.77}
 #cueText{font-size:15px;line-height:1.28}
-#why{font-size:11px;opacity:.6;margin-top:5px}
-.coachActions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
-.coachActions button{height:42px;border-radius:12px;background:rgba(255,255,255,.10)}
-#shutter{position:absolute;z-index:6;right:18px;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35);box-shadow:inset 0 0 0 3px #111;display:none}
-#tip{position:absolute;z-index:6;left:50%;top:calc(60px + var(--safeT));transform:translateX(-50%);font-size:11px;padding:7px 10px;border-radius:999px;display:none;white-space:nowrap}
+#backgroundText{font-size:12px;line-height:1.3;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.10);opacity:.78}
+#why{font-size:11px;opacity:.57;margin-top:5px}
+.coachActions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:9px}
+.coachActions button{height:40px;border-radius:11px;background:rgba(255,255,255,.09)}
+#coach.compact #stage{height:102px}
+#coach.expanded #stage{height:218px}
+#coach.minimized #sceneCard,#coach.minimized .cueTop,#coach.minimized #cueText,#coach.minimized #backgroundText,#coach.minimized #why,#coach.minimized .coachActions{display:none}
+#coach.minimized{left:auto;right:11px;width:155px}
+#coach.minimized #cueCard{padding:0;background:transparent;border:0}
+#coach.minimized #cueCard:after{content:"Scene Coach minimized";display:block;padding:11px;border-radius:14px;background:rgba(12,12,12,.38);border:1px solid rgba(255,255,255,.12);font-size:11px;text-align:center}
+#shutter{position:absolute;z-index:6;right:16px;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35);box-shadow:inset 0 0 0 3px #111;display:none}
 </style>
 </head>
 <body>
 <section id="intro">
-  <div class="kicker">POSECOACH · SCENE COACH SPRINT</div>
-  <h1>Show the shot.<br>Don't describe it.</h1>
-  <p class="lede">This build uses the actual person in front of the camera as the visual guide. The subject and virtual phone move together so the photographer can see the intended shot.</p>
+  <div class="kicker">POSECOACH · VOICE DIRECTOR</div>
+  <h1>Your photographer,<br>inside the frame.</h1>
+  <p class="lede">PoseCoach waits until you are ready, scans your real appearance, then gives spoken pose, framing, camera and background corrections.</p>
   <div class="cards">
-    <div class="card"><b>1 · CAMERA</b><span>Put one full person in frame.</span></div>
-    <div class="card"><b>2 · SCAN</b><span>PoseCoach makes a temporary visual proxy.</span></div>
-    <div class="card"><b>3 · WATCH</b><span>Subject + camera animate together.</span></div>
-    <div class="card"><b>4 · MATCH</b><span>Use the translucent target in the live view.</span></div>
+    <div class="card"><b>SOLO</b><span>No timer. Arm once, then walk into position.</span></div>
+    <div class="card"><b>VOICE</b><span>Short professional directions, one correction at a time.</span></div>
+    <div class="card"><b>GHOST ME</b><span>Your own scan stays whole and visible.</span></div>
+    <div class="card"><b>BACKGROUND</b><span>Basic clutter and composition guidance from the live frame.</span></div>
   </div>
-  <button id="start" class="primary">Open camera</button>
-  <div id="introStatus">Models load only after you open the camera.</div>
+  <button id="start" class="primary">Open camera + Voice Director</button>
+  <div id="introStatus">Use Safari. Your camera frames stay on this device in this prototype.</div>
 </section>
 
 <section id="camera">
   <video id="video" autoplay playsinline muted></video>
-  <img id="ghost" alt="Personalized target pose guide">
+  <img id="ghost" alt="Personalized target guide">
   <div id="tip" class="glass">Full body in frame</div>
   <div class="topbar">
     <button id="back" class="glass">‹</button>
     <div id="state" class="glass">Camera</div>
+    <button id="voiceBtn" class="glass">Voice on</button>
     <button id="flip" class="glass">Flip</button>
   </div>
+
   <div id="scanPanel" class="glass">
-    <h2>Solo scan</h2>
-    <p>Walk into position at your own pace. When your full body is framed, face the camera and show one open palm.</p>
-    <div id="palmReady">
-      <div class="palmRow">
-        <div id="palmDot"></div>
-        <div id="palmLabel">Waiting for your palm</div>
-      </div>
-      <div id="palmHint">Show your palm when you are ready. Hold it briefly, then lower it to trigger the scan.</div>
-      <div id="palmTrack"><div id="palmFill"></div></div>
+    <h2>Solo auto scan</h2>
+    <p>Tap once, then walk away. Let your gimbal track you. PoseCoach will wait until your full body is framed and stable before scanning.</p>
+    <div id="readyPanel">
+      <div class="readyRow"><div id="readyDot"></div><div id="readyLabel">Not armed yet</div></div>
+      <div id="readyHint">Tap “Scan when ready,” then take your time.</div>
+      <div id="readyTrack"><div id="readyFill"></div></div>
     </div>
-    <button id="scanBtn">Scan now instead</button>
-    <div id="scanProgress">Loading solo controls…</div>
+    <button id="scanBtn">Scan when ready</button>
+    <div id="scanProgress">Loading pose model…</div>
   </div>
+
   <div id="coach">
     <div id="sceneCard" class="glass">
-      <div class="sceneHead"><span>SCENE COACH</span><button id="replay">Replay motion</button></div>
+      <div class="sceneHead">
+        <span class="title">SCENE COACH</span>
+        <button id="sizeBtn">Medium</button>
+        <button id="minBtn">Minimize</button>
+        <button id="replay">Replay</button>
+      </div>
       <div id="stage">
         <div id="shotFrame"></div>
         <div id="floor"></div>
-        <div id="proxyShell">
-          <div class="proxyPart upper"><img id="proxyUpper"></div>
-          <div class="proxyPart lower"><img id="proxyLower"></div>
-        </div>
+        <div id="proxyShell"><img id="proxyWhole" alt="Scanned subject"></div>
         <div id="phoneActor"></div>
-        <div id="movePath">subject + camera</div>
       </div>
     </div>
+
     <div id="cueCard" class="glass">
-      <div class="cueTop"><span class="actor">SUBJECT</span><span class="actor">PHOTOGRAPHER</span></div>
+      <div class="cueTop"><span class="actor">SUBJECT</span><span class="actor">CAMERA</span><span class="actor">BACKGROUND</span></div>
       <div id="cueText"></div>
+      <div id="backgroundText"></div>
       <div id="why"></div>
       <div class="coachActions">
         <button id="prev">‹ Prev</button>
@@ -142,43 +153,123 @@ h1{font-size:44px;line-height:.96;letter-spacing:-.045em;margin:0 0 16px}
 <canvas id="cropCanvas" class="hidden"></canvas>
 
 <script type="module">
-import { PoseLandmarker, GestureRecognizer, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+
 const MODEL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
-const GESTURE_MODEL="https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task";
 const WASM="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
 const $=id=>document.getElementById(id);
+
 const intro=$("intro"),camera=$("camera"),video=$("video"),state=$("state");
 const scanPanel=$("scanPanel"),scanBtn=$("scanBtn"),scanProgress=$("scanProgress");
-const palmDot=$("palmDot"),palmLabel=$("palmLabel"),palmHint=$("palmHint"),palmFill=$("palmFill");
-const coach=$("coach"),ghost=$("ghost"),proxyUpper=$("proxyUpper"),proxyLower=$("proxyLower");
+const readyDot=$("readyDot"),readyLabel=$("readyLabel"),readyHint=$("readyHint"),readyFill=$("readyFill");
+const coach=$("coach"),ghost=$("ghost"),proxyWhole=$("proxyWhole"),cueCard=$("cueCard");
 const proxyShell=$("proxyShell"),phoneActor=$("phoneActor"),shotFrame=$("shotFrame");
 const scanCanvas=$("scanCanvas"),maskCanvas=$("maskCanvas"),cutoutCanvas=$("cutoutCanvas"),cropCanvas=$("cropCanvas");
-let stream=null,facing="environment",vision=null,imageLandmarker=null,gestureRecognizer=null,step=0,ghostOn=true;
-let palmWatchActive=false,palmRaf=0,lastGestureCheck=0,lastReadyCheck=0,palmState="waiting",palmHoldStart=0,palmLostStart=0,scanComplete=false;
+
+let stream=null,facing="environment",vision=null,imageLandmarker=null;
+let readyWatchActive=false,readyRaf=0,lastPoseCheck=0,stableStart=0,lastStableSample=null;
+let scanComplete=false,step=0,ghostOn=true,coachSize=1;
+let voiceOn=true,voicePrimed=false,stableVoiceGiven=false,backgroundAdvice="";
 
 const steps=[
-{cue:"Turn your chest a little away while the photographer lowers the phone.",why:"Body angle adds depth; lowering the camera changes the perspective at the same time.",subject:{shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(6px) rotate(-2deg)"}],upper:[{transform:"perspective(180px) rotateY(0deg)"},{transform:"perspective(180px) rotateY(14deg) rotateZ(-2deg)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(4px) rotate(1deg)"}]},camera:[{transform:"translate(0,0) rotate(-5deg)"},{transform:"translate(11px,12px) rotate(-2deg)"}],frame:[{transform:"scale(1) translate(0,0)"},{transform:"scale(.93) translate(-3px,5px)"}],ghost:"translateX(-48%) rotate(-2deg) perspective(600px) rotateY(7deg)"},
-{cue:"Shift most of your weight to the back leg while the photographer takes one step back.",why:"Your stance becomes less rigid while stepping back reduces wide-angle exaggeration.",subject:{shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(8px) rotate(2deg)"}],upper:[{transform:"translateX(0)"},{transform:"translateX(-2px) rotate(-1deg)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(7px) rotate(3deg)"}]},camera:[{transform:"translate(0,0) scale(1)"},{transform:"translate(13px,-2px) scale(.82)"}],frame:[{transform:"scale(1)"},{transform:"scale(.86)"}],ghost:"translateX(-46%) rotate(1deg)"},
-{cue:"Give the front hand a job near the pocket while the photographer shifts slightly toward your open shoulder.",why:"The hand stops floating and the camera sees more of the open side of the pose.",subject:{shell:[{transform:"translateX(0)"},{transform:"translateX(5px)"}],upper:[{transform:"rotate(0)"},{transform:"rotate(-3deg) translateY(2px)"}],lower:[{transform:"translateX(0)"},{transform:"translateX(2px)"}]},camera:[{transform:"translate(0,0)"},{transform:"translate(-16px,0) rotate(-7deg)"}],frame:[{transform:"translate(0,0)"},{transform:"translate(-7px,0)"}],ghost:"translateX(-52%) rotate(-2deg)"}
+ {
+  subject:"Turn your chest about a quarter-turn away from the lens and let your shoulders relax.",
+  camera:"Let the tracker hold you in frame. Keep the phone around chest-to-lower-chest height for this look.",
+  why:"A slight turn gives the body more depth and keeps the pose from feeling flat.",
+  shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(6px) rotate(-3deg)"}],
+  phone:[{transform:"translate(0,0) rotate(-5deg)"},{transform:"translate(10px,9px) rotate(-2deg)"}],
+  frame:[{transform:"scale(1)"},{transform:"scale(.94) translate(-3px,4px)"}],
+  ghost:"translate(-49%,-50%) rotate(-2deg)"
+ },
+ {
+  subject:"Shift most of your weight into the back leg. Keep the front knee soft instead of locking it.",
+  camera:"Hold the composition steady. If you feel too large in frame, take one small step back and let the gimbal follow.",
+  why:"The weight shift creates a more natural line through the hips and legs.",
+  shell:[{transform:"translateX(0) rotate(0deg)"},{transform:"translateX(7px) rotate(2deg)"}],
+  phone:[{transform:"translate(0,0) scale(1)"},{transform:"translate(9px,-2px) scale(.86)"}],
+  frame:[{transform:"scale(1)"},{transform:"scale(.88)"}],
+  ghost:"translate(-47%,-50%) rotate(1deg)"
+ },
+ {
+  subject:"Give the front hand a job. Rest the thumb lightly near a pocket and keep the fingers visible.",
+  camera:"Keep your face near the upper third of the frame and leave a little breathing room around your body.",
+  why:"A purposeful hand position looks intentional and prevents the arm from blending into the torso.",
+  shell:[{transform:"translateX(0)"},{transform:"translateX(5px) rotate(-1deg)"}],
+  phone:[{transform:"translate(0,0)"},{transform:"translate(-12px,0) rotate(-5deg)"}],
+  frame:[{transform:"translate(0,0)"},{transform:"translate(-6px,0)"}],
+  ghost:"translate(-51%,-50%) rotate(-2deg)"
+ }
 ];
 
 function setStatus(t){state.textContent=t}
-function setCue(){const s=steps[step];$("cueText").textContent=s.cue;$("why").textContent=s.why;ghost.style.transform=s.ghost}
+
+function pickVoice(){
+ const voices=window.speechSynthesis?speechSynthesis.getVoices():[];
+ if(!voices.length)return null;
+ const preferred=["Samantha","Ava","Allison","Aaron","Daniel"];
+ for(const name of preferred){
+  const v=voices.find(x=>x.lang.startsWith("en")&&x.name.includes(name));
+  if(v)return v;
+ }
+ return voices.find(x=>x.lang==="en-US")||voices.find(x=>x.lang.startsWith("en"))||voices[0];
+}
+
+function speak(text,{interrupt=true}={}){
+ if(!voiceOn||!window.speechSynthesis||!text)return;
+ if(interrupt)speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ const v=pickVoice();
+ if(v)u.voice=v;
+ u.lang="en-US";
+ u.rate=.92;
+ u.pitch=1.0;
+ u.volume=1.0;
+ speechSynthesis.speak(u);
+}
+
+function primeVoice(){
+ if(voicePrimed)return;
+ voicePrimed=true;
+ speak("Voice Director is on. I will keep the directions short and clear.");
+}
+
+function combinedInstruction(){
+ const s=steps[step];
+ return s.subject+" "+s.camera+(backgroundAdvice?" "+backgroundAdvice:"");
+}
+
+function setCue({speakNow=false}={}){
+ const s=steps[step];
+ $("cueText").textContent=s.subject+" "+s.camera;
+ $("why").textContent=s.why;
+ $("backgroundText").textContent=backgroundAdvice||"Background check will appear after the scan.";
+ ghost.style.transform=s.ghost;
+ if(speakNow)speak(combinedInstruction());
+}
 
 async function openCamera(){
  $("introStatus").textContent="Requesting camera…";
  try{
+  primeVoice();
   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
-  intro.style.display="none";camera.style.display="block";video.srcObject=stream;
+  intro.style.display="none";
+  camera.style.display="block";
+  video.srcObject=stream;
   try{await video.play()}catch(e){}
-  scanComplete=false;resetPalmUI();
-  setStatus("Camera ready");$("tip").style.display="block";prepareVision();
- }catch(e){$("introStatus").textContent="Camera failed: "+(e.name||"Error")+" · "+(e.message||"")}
+  scanComplete=false;
+  resetReadyUI();
+  setStatus("Camera ready");
+  $("tip").style.display="block";
+  prepareVision();
+  speak("Camera is ready. Tap Scan when ready, then walk into position. I will wait for you.");
+ }catch(e){
+  $("introStatus").textContent="Camera failed: "+(e.name||"Error")+" · "+(e.message||"");
+ }
 }
 
 async function prepareVision(){
  scanBtn.disabled=true;
- scanProgress.textContent="Loading pose + palm recognition…";
+ scanProgress.textContent="Loading pose model…";
  try{
   if(!vision)vision=await FilesetResolver.forVisionTasks(WASM);
   if(!imageLandmarker){
@@ -191,277 +282,347 @@ async function prepareVision(){
     outputSegmentationMasks:true
    });
   }
+  scanProgress.textContent="Ready. Tap “Scan when ready.”";
+  setStatus("Solo scan ready");
+  scanBtn.disabled=false;
  }catch(e){
   scanProgress.textContent="Pose model failed to load: "+(e.message||e);
   setStatus("Pose model unavailable");
-  scanBtn.disabled=false;
+ }
+}
+
+function resetReadyUI(message="Not armed yet"){
+ stableStart=0;
+ lastStableSample=null;
+ stableVoiceGiven=false;
+ readyDot.className="";
+ readyFill.style.width="0%";
+ readyLabel.textContent=message;
+ readyHint.textContent="Tap “Scan when ready,” then take your time.";
+ scanBtn.textContent="Scan when ready";
+ scanBtn.disabled=!imageLandmarker;
+}
+
+function stopReadyWatcher(){
+ readyWatchActive=false;
+ if(readyRaf)cancelAnimationFrame(readyRaf);
+ readyRaf=0;
+}
+
+function sampleBody(lm){
+ const shoulderX=(lm[11].x+lm[12].x)/2,shoulderY=(lm[11].y+lm[12].y)/2;
+ const hipX=(lm[23].x+lm[24].x)/2,hipY=(lm[23].y+lm[24].y)/2;
+ return {centerX:(shoulderX+hipX)/2,centerY:(shoulderY+hipY)/2,height:Math.max(lm[27].y,lm[28].y)-lm[0].y};
+}
+
+function isStable(sample){
+ if(!lastStableSample){lastStableSample=sample;return false}
+ const dx=Math.abs(sample.centerX-lastStableSample.centerX);
+ const dy=Math.abs(sample.centerY-lastStableSample.centerY);
+ const dh=Math.abs(sample.height-lastStableSample.height);
+ lastStableSample=sample;
+ return dx<.018&&dy<.018&&dh<.025;
+}
+
+function armAutoScan(){
+ if(!imageLandmarker){
+  scanProgress.textContent="Pose model is still loading…";
   return;
  }
- try{
-  if(!gestureRecognizer){
-   gestureRecognizer=await GestureRecognizer.createFromOptions(vision,{
-    baseOptions:{modelAssetPath:GESTURE_MODEL},
-    runningMode:"VIDEO",
-    numHands:1,
-    minHandDetectionConfidence:.45,
-    minHandPresenceConfidence:.45,
-    minTrackingConfidence:.45
-   });
-  }
-  scanProgress.textContent="Ready. Walk into position and show your open palm.";
-  setStatus("Palm ready");
-  scanBtn.disabled=false;
-  startPalmWatcher();
- }catch(e){
-  console.warn("Palm model unavailable",e);
-  scanProgress.textContent="Palm recognition is unavailable on this device. Use “Scan now instead.”";
-  setStatus("Manual scan ready");
-  scanBtn.disabled=false;
- }
+ readyWatchActive=true;
+ stableStart=0;
+ lastStableSample=null;
+ stableVoiceGiven=false;
+ scanBtn.textContent="Cancel auto scan";
+ readyLabel.textContent="Armed · walk into position";
+ readyHint.textContent="No timer. PoseCoach will wait until your full body is framed and still.";
+ readyFill.style.width="0%";
+ setStatus("Waiting for you");
+ speak("Take your time. Walk into position. I will scan only after your full body is framed and still.");
+ watchForStableFrame();
 }
 
-function resetPalmUI(message="Waiting for your palm"){
- palmState="waiting";
- palmHoldStart=0;
- palmLostStart=0;
- palmDot.className="";
- palmFill.style.width="0%";
- palmLabel.textContent=message;
- palmHint.textContent="Show your palm when you are ready. Hold it briefly, then lower it to trigger the scan.";
+function cancelAutoScan(){
+ stopReadyWatcher();
+ resetReadyUI("Auto scan cancelled");
+ scanProgress.textContent="Ready whenever you are.";
+ setStatus("Solo scan ready");
+ speak("Auto scan cancelled.");
 }
 
-function stopPalmWatcher(){
- palmWatchActive=false;
- if(palmRaf)cancelAnimationFrame(palmRaf);
- palmRaf=0;
-}
-
-function fullBodyReadiness(){
- if(!imageLandmarker)return {ok:false,message:"Pose model is not ready yet."};
- try{
-  drawVideoCover(scanCanvas);
-  const result=imageLandmarker.detect(scanCanvas);
-  const lm=result.landmarks?.[0];
-  if(!lm)return {ok:false,message:"I can’t see one full person yet."};
-
-  const required=[0,11,12,23,24,25,26,27,28];
-  const visible=required.every(i=>lm[i] && (lm[i].visibility??1)>.35);
-  if(!visible)return {ok:false,message:"Palm seen — step back until your head, torso, knees and ankles are visible."};
-
-  const xs=required.map(i=>lm[i].x),ys=required.map(i=>lm[i].y);
-  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
-  const height=maxY-minY;
-
-  if(minX<.025 || maxX>.975 || minY<.025 || maxY>.975)
-   return {ok:false,message:"Palm seen — step back a little so your whole body has space around it."};
-  if(height<.34)
-   return {ok:false,message:"You are fully visible, but very far away. Move a little closer and show your palm again."};
-
-  return {ok:true,message:"Full body framed"};
- }catch(e){
-  console.warn("Readiness check failed",e);
-  return {ok:false,message:"Hold your position and show your palm again."};
- }
-}
-
-function handlePalm(openPalm,score,now){
- if(scanComplete)return;
-
- if(palmState==="waiting"){
-  if(!openPalm)return;
-  if(now-lastReadyCheck<550)return;
-  lastReadyCheck=now;
-
-  const ready=fullBodyReadiness();
-  if(!ready.ok){
-   palmDot.className="detected";
-   palmLabel.textContent="Palm detected";
-   palmHint.textContent=ready.message;
-   palmFill.style.width="0%";
-   return;
-  }
-
-  palmState="holding";
-  palmHoldStart=now;
-  palmDot.className="detected";
-  palmLabel.textContent="Palm detected · hold steady";
-  palmHint.textContent="Framing looks good. Keep your palm up for a moment.";
-  palmFill.style.width="4%";
-  return;
- }
-
- if(palmState==="holding"){
-  if(!openPalm){
-   resetPalmUI("Palm lost — show it again when ready");
-   return;
-  }
-  const progress=Math.min(1,(now-palmHoldStart)/800);
-  palmFill.style.width=Math.round(progress*100)+"%";
-  if(progress>=1){
-   palmState="armed";
-   palmDot.className="armed";
-   palmLabel.textContent="Ready ✓";
-   palmHint.textContent="Lower your hand. PoseCoach will scan after you settle.";
-   palmFill.style.width="100%";
-   setStatus("Lower palm to scan");
-  }
-  return;
- }
-
- if(palmState==="armed"){
-  if(openPalm){
-   palmLostStart=0;
-   return;
-  }
-  if(!palmLostStart)palmLostStart=now;
-  if(now-palmLostStart>=350){
-   palmState="settling";
-   palmLabel.textContent="Hold still…";
-   palmHint.textContent="Capturing your initial scan pose.";
-   palmFill.style.width="100%";
-   setStatus("Scanning");
-   stopPalmWatcher();
-   setTimeout(()=>scanPerson(true),450);
-  }
- }
-}
-
-function startPalmWatcher(){
- if(!gestureRecognizer || palmWatchActive || scanComplete)return;
- palmWatchActive=true;
- lastGestureCheck=0;
-
+function watchForStableFrame(){
+ if(!readyWatchActive||scanComplete)return;
  const loop=()=>{
-  if(!palmWatchActive || scanComplete)return;
+  if(!readyWatchActive||scanComplete)return;
   const now=performance.now();
-
-  if(video.readyState>=2 && now-lastGestureCheck>=140){
-   lastGestureCheck=now;
+  if(video.readyState>=2&&now-lastPoseCheck>=280){
+   lastPoseCheck=now;
    try{
-    const result=gestureRecognizer.recognizeForVideo(video,now);
-    const top=result.gestures?.[0]?.[0];
-    const openPalm=!!top && top.categoryName==="Open_Palm" && top.score>=.52;
-    handlePalm(openPalm,top?.score||0,now);
-   }catch(e){
-    console.warn("Gesture frame failed",e);
-   }
+    drawVideoCover(scanCanvas);
+    const result=imageLandmarker.detect(scanCanvas);
+    const lm=result.landmarks?.[0];
+    if(!lm){
+     stableStart=0;lastStableSample=null;stableVoiceGiven=false;
+     readyDot.className="";
+     readyLabel.textContent="Looking for you";
+     readyHint.textContent="Walk into view and let the gimbal settle.";
+     readyFill.style.width="0%";
+    }else{
+     const ready=fullBodyReadinessFromLandmarks(lm);
+     if(!ready.ok){
+      stableStart=0;lastStableSample=null;stableVoiceGiven=false;
+      readyDot.className="seen";
+      readyLabel.textContent="I see you";
+      readyHint.textContent=ready.message;
+      readyFill.style.width="0%";
+     }else{
+      const sample=sampleBody(lm);
+      if(!isStable(sample)){
+       stableStart=0;
+       readyDot.className="seen";
+       readyLabel.textContent="Frame looks good";
+       readyHint.textContent="Let yourself and the gimbal settle.";
+       readyFill.style.width="0%";
+      }else{
+       if(!stableStart)stableStart=now;
+       if(!stableVoiceGiven){
+        stableVoiceGiven=true;
+        speak("That framing looks good. Hold there for a moment.",{interrupt:false});
+       }
+       const progress=Math.min(1,(now-stableStart)/1800);
+       readyDot.className=progress>.85?"stable":"seen";
+       readyLabel.textContent=progress>=1?"Ready ✓":"Hold still…";
+       readyHint.textContent="Full body framed. Waiting for a stable shot.";
+       readyFill.style.width=Math.round(progress*100)+"%";
+       if(progress>=1){
+        stopReadyWatcher();
+        setStatus("Scanning");
+        readyLabel.textContent="Scanning now…";
+        speak("Perfect. Stay there. Scanning now.");
+        setTimeout(()=>scanPerson(true),250);
+        return;
+       }
+      }
+     }
+    }
+   }catch(e){console.warn("Auto-scan frame check failed",e)}
   }
-
-  palmRaf=requestAnimationFrame(loop);
+  readyRaf=requestAnimationFrame(loop);
  };
- palmRaf=requestAnimationFrame(loop);
+ readyRaf=requestAnimationFrame(loop);
 }
 
 function drawVideoCover(canvas){
- const vw=video.videoWidth,vh=video.videoHeight;if(!vw||!vh)throw new Error("Camera frame is not ready yet.");
- const outW=480,outH=Math.round(outW*(innerHeight/innerWidth));canvas.width=outW;canvas.height=outH;
- const ctx=canvas.getContext("2d"),srcAspect=vw/vh,dstAspect=outW/outH;let sx=0,sy=0,sw=vw,sh=vh;
+ const vw=video.videoWidth,vh=video.videoHeight;
+ if(!vw||!vh)throw new Error("Camera frame is not ready yet.");
+ const outW=480,outH=Math.round(outW*(innerHeight/innerWidth));
+ canvas.width=outW;canvas.height=outH;
+ const ctx=canvas.getContext("2d"),srcAspect=vw/vh,dstAspect=outW/outH;
+ let sx=0,sy=0,sw=vw,sh=vh;
  if(srcAspect>dstAspect){sw=vh*dstAspect;sx=(vw-sw)/2}else{sh=vw/dstAspect;sy=(vh-sh)/2}
  ctx.drawImage(video,sx,sy,sw,sh,0,0,outW,outH);
 }
 
+function fullBodyReadinessFromLandmarks(lm){
+ const required=[0,11,12,23,24,25,26,27,28];
+ const visible=required.every(i=>lm[i]&&(lm[i].visibility??1)>.35);
+ if(!visible)return {ok:false,message:"Step back until your head, torso, knees and ankles are visible."};
+ const xs=required.map(i=>lm[i].x),ys=required.map(i=>lm[i].y);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const bodyHeight=maxY-minY;
+ if(minX<.025||maxX>.975||minY<.025||maxY>.975)return {ok:false,message:"Give yourself a little more space around the edges."};
+ if(bodyHeight<.34)return {ok:false,message:"You are fully visible but too small in frame. Move a little closer."};
+ return {ok:true};
+}
+
 function makeMask(mpMask){
- const arr=mpMask.getAsFloat32Array(),w=mpMask.width,h=mpMask.height;maskCanvas.width=w;maskCanvas.height=h;
+ const arr=mpMask.getAsFloat32Array(),w=mpMask.width,h=mpMask.height;
+ maskCanvas.width=w;maskCanvas.height=h;
  const mctx=maskCanvas.getContext("2d"),img=mctx.createImageData(w,h);
- for(let i=0;i<arr.length;i++){const a=Math.max(0,Math.min(255,Math.round(arr[i]*255))),j=i*4;img.data[j]=255;img.data[j+1]=255;img.data[j+2]=255;img.data[j+3]=a}
+ for(let i=0;i<arr.length;i++){
+  const a=Math.max(0,Math.min(255,Math.round(arr[i]*255))),j=i*4;
+  img.data[j]=255;img.data[j+1]=255;img.data[j+2]=255;img.data[j+3]=a;
+ }
  mctx.putImageData(img,0,0);
 }
 
-function cropBounds(landmarks){
- const visible=landmarks.filter(p=>(p.visibility??1)>.25);
- if(!visible.length)return [0.08,0.05,0.92,0.96];
- return [Math.max(0,Math.min(...visible.map(p=>p.x))-.09),Math.max(0,Math.min(...visible.map(p=>p.y))-.10),Math.min(1,Math.max(...visible.map(p=>p.x))+.09),Math.min(1,Math.max(...visible.map(p=>p.y))+.06)];
+function cropBounds(lm){
+ const visible=lm.filter(p=>(p.visibility??1)>.25);
+ if(!visible.length)return [.08,.05,.92,.96];
+ return [
+  Math.max(0,Math.min(...visible.map(p=>p.x))-.09),
+  Math.max(0,Math.min(...visible.map(p=>p.y))-.10),
+  Math.min(1,Math.max(...visible.map(p=>p.x))+.09),
+  Math.min(1,Math.max(...visible.map(p=>p.y))+.06)
+ ];
 }
 
-function makeCutout(landmarks){
- cutoutCanvas.width=scanCanvas.width;cutoutCanvas.height=scanCanvas.height;const cctx=cutoutCanvas.getContext("2d");
- cctx.clearRect(0,0,cutoutCanvas.width,cutoutCanvas.height);cctx.drawImage(scanCanvas,0,0);cctx.globalCompositeOperation="destination-in";cctx.drawImage(maskCanvas,0,0,cutoutCanvas.width,cutoutCanvas.height);cctx.globalCompositeOperation="source-over";
- const [minX,minY,maxX,maxY]=cropBounds(landmarks),x=minX*cutoutCanvas.width,y=minY*cutoutCanvas.height,w=(maxX-minX)*cutoutCanvas.width,h=(maxY-minY)*cutoutCanvas.height;
- cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));cropCanvas.getContext("2d").drawImage(cutoutCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
+function makeCutout(lm){
+ cutoutCanvas.width=scanCanvas.width;cutoutCanvas.height=scanCanvas.height;
+ const cctx=cutoutCanvas.getContext("2d");
+ cctx.clearRect(0,0,cutoutCanvas.width,cutoutCanvas.height);
+ cctx.drawImage(scanCanvas,0,0);
+ cctx.globalCompositeOperation="destination-in";
+ cctx.drawImage(maskCanvas,0,0,cutoutCanvas.width,cutoutCanvas.height);
+ cctx.globalCompositeOperation="source-over";
+ const [minX,minY,maxX,maxY]=cropBounds(lm);
+ const x=minX*cutoutCanvas.width,y=minY*cutoutCanvas.height,w=(maxX-minX)*cutoutCanvas.width,h=(maxY-minY)*cutoutCanvas.height;
+ cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));
+ cropCanvas.getContext("2d").drawImage(cutoutCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
  return cropCanvas.toDataURL("image/png");
 }
 
-function makePhotoFallback(landmarks){
- const [minX,minY,maxX,maxY]=cropBounds(landmarks),x=minX*scanCanvas.width,y=minY*scanCanvas.height,w=(maxX-minX)*scanCanvas.width,h=(maxY-minY)*scanCanvas.height;
- cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));cropCanvas.getContext("2d").drawImage(scanCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
+function makePhotoFallback(lm){
+ const [minX,minY,maxX,maxY]=cropBounds(lm);
+ const x=minX*scanCanvas.width,y=minY*scanCanvas.height,w=(maxX-minX)*scanCanvas.width,h=(maxY-minY)*scanCanvas.height;
+ cropCanvas.width=Math.max(1,Math.round(w));cropCanvas.height=Math.max(1,Math.round(h));
+ cropCanvas.getContext("2d").drawImage(scanCanvas,x,y,w,h,0,0,cropCanvas.width,cropCanvas.height);
  return cropCanvas.toDataURL("image/jpeg",.9);
 }
 
-async function scanPerson(autoTriggered=false){
- if(!imageLandmarker){
-  scanProgress.textContent="Pose model is still loading…";
-  if(autoTriggered){resetPalmUI();startPalmWatcher();}
-  return;
+function regionMetrics(x0,y0,x1,y1){
+ const ctx=scanCanvas.getContext("2d");
+ const w=scanCanvas.width,h=scanCanvas.height;
+ const sx=Math.max(0,Math.floor(x0*w)),sy=Math.max(0,Math.floor(y0*h));
+ const ex=Math.min(w,Math.ceil(x1*w)),ey=Math.min(h,Math.ceil(y1*h));
+ if(ex-sx<10||ey-sy<10)return null;
+ const img=ctx.getImageData(sx,sy,ex-sx,ey-sy);
+ const d=img.data,rw=ex-sx,rh=ey-sy;
+ let lum=0,edges=0,n=0;
+ const gray=(i)=>.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];
+ for(let y=0;y<rh-4;y+=4){
+  for(let x=0;x<rw-4;x+=4){
+   const i=(y*rw+x)*4,ir=(y*rw+x+4)*4,id=((y+4)*rw+x)*4;
+   const g=gray(i);
+   lum+=g;
+   edges+=(Math.abs(g-gray(ir))+Math.abs(g-gray(id)))/510;
+   n++;
+  }
  }
- stopPalmWatcher();
+ return n?{brightness:lum/n,edge:edges/n}:null;
+}
+
+function analyzeBackground(lm){
+ const [minX,minY,maxX,maxY]=cropBounds(lm);
+ const y0=Math.max(.05,minY),y1=Math.min(.78,maxY);
+ const left=regionMetrics(Math.max(0,minX-.34),y0,Math.max(.02,minX-.035),y1);
+ const right=regionMetrics(Math.min(.98,maxX+.035),y0,Math.min(1,maxX+.34),y1);
+
+ if(left&&right){
+  const delta=left.edge-right.edge;
+  if(Math.abs(delta)>.035){
+   if(delta<0)return "The left side of the scene is cleaner. Take a small step left and let the gimbal follow so the calmer background sits behind you.";
+   return "The right side of the scene is cleaner. Take a small step right and let the gimbal follow so the calmer background sits behind you.";
+  }
+  if(left.edge>.16&&right.edge>.16)return "The background is visually busy. If you can, move a few feet away from it or rotate toward a simpler area for stronger separation.";
+  if(Math.max(left.brightness,right.brightness)>205&&Math.abs(left.brightness-right.brightness)>30){
+   const darker=left.brightness<right.brightness?"left":"right";
+   return "There is a bright distraction on one side. Shift slightly "+darker+" so your face has a calmer background behind it.";
+  }
+ }
+ return "The background is reasonably clean. Keep a little distance between yourself and the background so you stand out from it.";
+}
+
+async function scanPerson(autoTriggered=false){
+ if(!imageLandmarker){scanProgress.textContent="Pose model is still loading…";return}
+ stopReadyWatcher();
  scanBtn.disabled=true;
- scanProgress.textContent=autoTriggered?"Palm trigger accepted · scanning…":"Scanning person…";
+ scanProgress.textContent=autoTriggered?"Stable frame confirmed · scanning…":"Scanning…";
  try{
   drawVideoCover(scanCanvas);
   const result=imageLandmarker.detect(scanCanvas);
-  if(!result.landmarks?.length)throw new Error("I can’t see one clear person. Step back so your full body is visible.");
-
-  const ready=fullBodyReadinessFromLandmarks(result.landmarks[0]);
+  if(!result.landmarks?.length)throw new Error("I cannot see one clear person. Step back so your full body is visible.");
+  const lm=result.landmarks[0];
+  const ready=fullBodyReadinessFromLandmarks(lm);
   if(!ready.ok)throw new Error(ready.message);
 
   let url=null;
   if(result.segmentationMasks?.length){
-   try{makeMask(result.segmentationMasks[0]);url=makeCutout(result.landmarks[0])}
-   catch(e){console.warn(e)}
+   try{makeMask(result.segmentationMasks[0]);url=makeCutout(lm)}catch(e){console.warn(e)}
   }
-  if(!url)url=makePhotoFallback(result.landmarks[0]);
+  if(!url)url=makePhotoFallback(lm);
 
+  backgroundAdvice=analyzeBackground(lm);
+  proxyWhole.src=url;ghost.src=url;ghost.style.display="block";
   scanComplete=true;
-  proxyUpper.src=url;proxyLower.src=url;ghost.src=url;ghost.style.display="block";
   scanPanel.style.display="none";coach.style.display="grid";$("shutter").style.display="block";$("tip").style.display="none";
-  setCue();setStatus("Scene Coach ready");setTimeout(animateScene,250);
+  setCue();
+  setStatus("Voice Director ready");
+  setTimeout(()=>{animateScene();speak("Great, I have you. "+combinedInstruction())},300);
  }catch(e){
   scanProgress.textContent=e.message||String(e);
   scanBtn.disabled=false;
   setStatus("Ready to try again");
-  if(autoTriggered){
-   resetPalmUI("Scan missed — show your palm to retry");
-   setTimeout(startPalmWatcher,350);
-  }
+  resetReadyUI("Scan missed · try again");
+  speak("I missed that scan. Take your time and try again when you are ready.");
  }
-}
-
-function fullBodyReadinessFromLandmarks(lm){
- const required=[0,11,12,23,24,25,26,27,28];
- const visible=required.every(i=>lm[i] && (lm[i].visibility??1)>.35);
- if(!visible)return {ok:false,message:"Step back until your head, torso, knees and ankles are all visible."};
- const xs=required.map(i=>lm[i].x),ys=required.map(i=>lm[i].y);
- const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
- if(minX<.025 || maxX>.975 || minY<.025 || maxY>.975)
-  return {ok:false,message:"Give yourself a little more space around the edges of the frame."};
- return {ok:true};
 }
 
 function animateScene(){
  const s=steps[step],opt={duration:2100,easing:"cubic-bezier(.2,.75,.2,1)",fill:"forwards"};
- [proxyShell,document.querySelector(".proxyPart.upper"),document.querySelector(".proxyPart.lower"),phoneActor,shotFrame].forEach(el=>el.getAnimations().forEach(a=>a.cancel()));
- proxyShell.animate(s.subject.shell,opt);document.querySelector(".proxyPart.upper").animate(s.subject.upper,opt);document.querySelector(".proxyPart.lower").animate(s.subject.lower,opt);phoneActor.animate(s.camera,opt);shotFrame.animate(s.frame,opt);
+ [proxyShell,phoneActor,shotFrame].forEach(el=>el.getAnimations().forEach(a=>a.cancel()));
+ cueCard.style.opacity=".32";
+ proxyShell.animate(s.shell,opt);
+ phoneActor.animate(s.phone,opt);
+ shotFrame.animate(s.frame,opt);
+ setTimeout(()=>{cueCard.style.opacity="1"},2100);
 }
-function changeStep(delta){step=(step+delta+steps.length)%steps.length;setCue();animateScene()}
+
+function changeStep(delta){
+ step=(step+delta+steps.length)%steps.length;
+ setCue({speakNow:true});
+ animateScene();
+}
 
 $("start").addEventListener("click",openCamera);
-$("scanBtn").addEventListener("click",()=>scanPerson(false));
-$("replay").addEventListener("click",animateScene);
+$("scanBtn").addEventListener("click",()=>readyWatchActive?cancelAutoScan():armAutoScan());
+$("replay").addEventListener("click",()=>{animateScene();speak(combinedInstruction())});
 $("next").addEventListener("click",()=>changeStep(1));
 $("prev").addEventListener("click",()=>changeStep(-1));
-$("ghostBtn").addEventListener("click",e=>{ghostOn=!ghostOn;ghost.style.display=ghostOn?"block":"none";e.currentTarget.textContent=ghostOn?"Ghost on":"Ghost off"});
+
+$("voiceBtn").addEventListener("click",()=>{
+ voiceOn=!voiceOn;
+ $("voiceBtn").textContent=voiceOn?"Voice on":"Voice off";
+ if(voiceOn){primeVoice();speak("Voice Director is on.")}else if(window.speechSynthesis)speechSynthesis.cancel();
+});
+
+$("ghostBtn").addEventListener("click",e=>{
+ ghostOn=!ghostOn;ghost.style.display=ghostOn?"block":"none";
+ e.currentTarget.textContent=ghostOn?"Ghost on":"Ghost off";
+});
+
+$("sizeBtn").addEventListener("click",()=>{
+ coach.classList.remove("compact","expanded");
+ coachSize=(coachSize+1)%3;
+ if(coachSize===0){coach.classList.add("compact");$("sizeBtn").textContent="Small"}
+ else if(coachSize===1){$("sizeBtn").textContent="Medium"}
+ else{coach.classList.add("expanded");$("sizeBtn").textContent="Large"}
+});
+
+$("minBtn").addEventListener("click",()=>{
+ const m=coach.classList.toggle("minimized");
+ $("minBtn").textContent=m?"Restore":"Minimize";
+});
+
 $("flip").addEventListener("click",async()=>{
- stopPalmWatcher();
+ stopReadyWatcher();
  if(stream)stream.getTracks().forEach(t=>t.stop());
  facing=facing==="environment"?"user":"environment";
  await openCamera();
 });
+
 $("back").addEventListener("click",()=>{
- stopPalmWatcher();
+ stopReadyWatcher();
  if(stream)stream.getTracks().forEach(t=>t.stop());
+ if(window.speechSynthesis)speechSynthesis.cancel();
  camera.style.display="none";intro.style.display="flex";
 });
-$("shutter").addEventListener("click",()=>setStatus("Capture comes after Scene Coach validation"));
+
+$("shutter").addEventListener("click",()=>speak("Capture control is not connected in this interaction prototype yet. Hold the pose while we validate the coaching flow."));
+
+if(window.speechSynthesis){
+ speechSynthesis.onvoiceschanged=()=>pickVoice();
+}
 setCue();
 </script>
 </body>
