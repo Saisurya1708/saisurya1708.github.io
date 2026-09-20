@@ -105,3 +105,10 @@ On an iPhone:
 5. The same person's representation appears in Ghost Me and Scene Coach.
 6. Replay animates subject movement and virtual camera movement simultaneously.
 7. Next instruction changes both the text cue and visual motion.
+
+
+### D-021 — Palm-triggered solo scan
+**Trigger:** Solo users need time to move away from the phone and confirm framing without racing a timer.
+**Tradeoff:** Gesture-recognition complexity vs. a calmer, self-controlled setup flow.
+**Vote:** 9–0
+**Ruling:** In solo mode, an open palm is the default readiness signal. PoseCoach verifies full-body framing, requires a brief steady hold, then waits for the palm to lower before capturing the initial scan. Manual scan remains as a fallback.
