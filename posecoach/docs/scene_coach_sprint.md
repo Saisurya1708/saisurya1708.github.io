@@ -112,3 +112,10 @@ On an iPhone:
 **Tradeoff:** Gesture-recognition complexity vs. a calmer, self-controlled setup flow.
 **Vote:** 9–0
 **Ruling:** In solo mode, an open palm is the default readiness signal. PoseCoach verifies full-body framing, requires a brief steady hold, then waits for the palm to lower before capturing the initial scan. Manual scan remains as a fallback.
+
+
+### D-022 — Continuous Voice Director
+**Trigger:** Solo testing showed that a single spoken instruction is insufficient once the gimbal changes framing or the subject moves.
+**Tradeoff:** More frequent live CV checks vs. battery/thermal load and excessive voice chatter.
+**Vote:** 9–0
+**Ruling:** After the initial scan, PoseCoach continuously re-checks the live subject. Priority is framing first, then distance/position, then pose correction, then background. Speech is rate-limited so the Director does not talk continuously. If full-body framing is lost, framing guidance temporarily overrides pose coaching.
