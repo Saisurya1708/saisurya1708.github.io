@@ -32,6 +32,11 @@ h1{font-size:43px;line-height:.97;letter-spacing:-.045em;margin:0 0 16px}
 #state{display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #voiceBtn{font-size:11px}
 #tip{position:absolute;z-index:5;left:50%;top:calc(56px + var(--safeT));transform:translateX(-50%);font-size:11px;padding:7px 10px;border-radius:999px;display:none;white-space:nowrap}
+#voiceGate{position:absolute;z-index:12;left:13px;right:13px;top:calc(60px + var(--safeT));padding:12px;border-radius:17px;display:none}
+#voiceGateTitle{font-size:13px;font-weight:700;margin-bottom:4px}
+#voiceGateText{font-size:11px;line-height:1.35;opacity:.72;margin-bottom:9px}
+#enableVoiceBtn{height:44px;width:100%;border-radius:13px;background:#fff;color:#090909;font-weight:720}
+#voiceStatus{font-size:10px;line-height:1.35;opacity:.72;margin-top:7px;min-height:14px}
 
 #scanPanel{position:absolute;z-index:8;left:13px;right:13px;bottom:calc(18px + var(--safeB));padding:14px;border-radius:20px}
 #scanPanel h2{font-size:19px;margin:0 0 5px}
@@ -97,10 +102,16 @@ h1{font-size:43px;line-height:.97;letter-spacing:-.045em;margin:0 0 16px}
   <video id="video" autoplay playsinline muted></video>
   <img id="ghost" alt="Personalized target guide">
   <div id="tip" class="glass">Full body in frame</div>
+  <div id="voiceGate" class="glass">
+    <div id="voiceGateTitle">Enable Voice Director</div>
+    <div id="voiceGateText">iPhone Safari needs one tap after camera permission before spoken coaching can start.</div>
+    <button id="enableVoiceBtn">Enable + test voice</button>
+    <div id="voiceStatus">Camera audio is not being recorded.</div>
+  </div>
   <div class="topbar">
     <button id="back" class="glass">‹</button>
     <div id="state" class="glass">Camera</div>
-    <button id="voiceBtn" class="glass">Voice on</button>
+    <button id="voiceBtn" class="glass">Voice locked</button>
     <button id="flip" class="glass">Flip</button>
   </div>
 
@@ -160,6 +171,7 @@ const WASM="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
 const $=id=>document.getElementById(id);
 
 const intro=$("intro"),camera=$("camera"),video=$("video"),state=$("state");
+const voiceGate=$("voiceGate"),enableVoiceBtn=$("enableVoiceBtn"),voiceStatus=$("voiceStatus"),voiceBtn=$("voiceBtn");
 const scanPanel=$("scanPanel"),scanBtn=$("scanBtn"),scanProgress=$("scanProgress");
 const readyDot=$("readyDot"),readyLabel=$("readyLabel"),readyHint=$("readyHint"),readyFill=$("readyFill");
 const coach=$("coach"),ghost=$("ghost"),proxyWhole=$("proxyWhole"),cueCard=$("cueCard");
@@ -169,7 +181,7 @@ const scanCanvas=$("scanCanvas"),maskCanvas=$("maskCanvas"),cutoutCanvas=$("cuto
 let stream=null,facing="environment",vision=null,imageLandmarker=null;
 let readyWatchActive=false,readyRaf=0,lastPoseCheck=0,stableStart=0,lastStableSample=null;
 let scanComplete=false,step=0,ghostOn=true,coachSize=1;
-let voiceOn=true,voicePrimed=false,stableVoiceGiven=false,backgroundAdvice="";
+let voiceOn=false,voiceUnlocked=false,stableVoiceGiven=false,backgroundAdvice="",lastUtterance=null;
 
 const steps=[
  {
@@ -208,29 +220,89 @@ function pickVoice(){
  if(!voices.length)return null;
  const preferred=["Samantha","Ava","Allison","Aaron","Daniel"];
  for(const name of preferred){
-  const v=voices.find(x=>x.lang.startsWith("en")&&x.name.includes(name));
+  const v=voices.find(x=>x.lang&&x.lang.startsWith("en")&&x.name.includes(name));
   if(v)return v;
  }
- return voices.find(x=>x.lang==="en-US")||voices.find(x=>x.lang.startsWith("en"))||voices[0];
+ return voices.find(x=>x.lang==="en-US")||voices.find(x=>x.lang&&x.lang.startsWith("en"))||voices[0];
 }
 
-function speak(text,{interrupt=true}={}){
- if(!voiceOn||!window.speechSynthesis||!text)return;
- if(interrupt)speechSynthesis.cancel();
- const u=new SpeechSynthesisUtterance(text);
- const v=pickVoice();
- if(v)u.voice=v;
- u.lang="en-US";
- u.rate=.92;
- u.pitch=1.0;
- u.volume=1.0;
- speechSynthesis.speak(u);
+function ensurePreviewPlaying(){
+ if(video && video.srcObject && video.paused){
+  video.play().catch(()=>{});
+ }
 }
 
-function primeVoice(){
- if(voicePrimed)return;
- voicePrimed=true;
- speak("Voice Director is on. I will keep the directions short and clear.");
+function speak(text,{interrupt=true,diagnostic=false}={}){
+ if(!voiceOn||!voiceUnlocked||!window.speechSynthesis||!text)return false;
+
+ try{
+  if(interrupt)speechSynthesis.cancel();
+  if(speechSynthesis.paused)speechSynthesis.resume();
+
+  const u=new SpeechSynthesisUtterance(text);
+  const v=pickVoice();
+  if(v)u.voice=v;
+  u.lang="en-US";
+  u.rate=.92;
+  u.pitch=1.0;
+  u.volume=1.0;
+
+  u.onstart=()=>{
+   if(diagnostic){
+    voiceStatus.textContent="Speaking now… If you hear this sentence, Voice Director is working.";
+    enableVoiceBtn.textContent="Test voice again";
+   }
+  };
+
+  u.onend=()=>{
+   ensurePreviewPlaying();
+   if(diagnostic){
+    voiceStatus.textContent="Speech completed. If you heard nothing, raise media volume and check the iPhone audio output route.";
+   }
+  };
+
+  u.onerror=(event)=>{
+   ensurePreviewPlaying();
+   if(diagnostic){
+    voiceStatus.textContent="Speech error: "+(event.error||"unknown")+". Tap Test voice again.";
+   }
+  };
+
+  lastUtterance=u;
+  speechSynthesis.speak(u);
+  return true;
+ }catch(e){
+  if(diagnostic)voiceStatus.textContent="Voice could not start: "+(e.message||e);
+  return false;
+ }
+}
+
+function unlockVoice(){
+ if(!window.speechSynthesis){
+  voiceStatus.textContent="Speech synthesis is unavailable in this browser. Open this page directly in Safari.";
+  return;
+ }
+
+ voiceUnlocked=true;
+ voiceOn=true;
+ voiceBtn.textContent="Voice on";
+ voiceStatus.textContent="Starting iPhone voice…";
+ voiceGateTitle.textContent="Voice Director test";
+ voiceGateText.textContent="You should hear a short test sentence now.";
+
+ // This call happens directly inside the user's tap, which is important on iPhone Safari.
+ speak("PoseCoach Voice Director is working. I will guide your pose, camera framing, and background.",{interrupt:false,diagnostic:true});
+}
+
+function testVoice(){
+ if(!voiceUnlocked){
+  voiceGate.style.display="block";
+  voiceStatus.textContent="Tap Enable and test voice first.";
+  return;
+ }
+ voiceOn=true;
+ voiceBtn.textContent="Voice on";
+ speak("Voice Director test. Turn your shoulders slightly, keep your chin relaxed, and hold that frame.",{diagnostic:true});
 }
 
 function combinedInstruction(){
@@ -250,7 +322,6 @@ function setCue({speakNow=false}={}){
 async function openCamera(){
  $("introStatus").textContent="Requesting camera…";
  try{
-  primeVoice();
   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
   intro.style.display="none";
   camera.style.display="block";
@@ -260,8 +331,9 @@ async function openCamera(){
   resetReadyUI();
   setStatus("Camera ready");
   $("tip").style.display="block";
+  voiceGate.style.display="block";
+  voiceStatus.textContent="Tap Enable + test voice before starting the solo scan.";
   prepareVision();
-  speak("Camera is ready. Tap Scan when ready, then walk into position. I will wait for you.");
  }catch(e){
   $("introStatus").textContent="Camera failed: "+(e.name||"Error")+" · "+(e.message||"");
  }
@@ -325,6 +397,13 @@ function isStable(sample){
 }
 
 function armAutoScan(){
+ if(!voiceUnlocked){
+  voiceGate.style.display="block";
+  voiceStatus.textContent="Enable and test Voice Director first so you can hear hands-free coaching.";
+  speak("",{});
+  return;
+ }
+ voiceGate.style.display="none";
  if(!imageLandmarker){
   scanProgress.textContent="Pose model is still loading…";
   return;
@@ -580,10 +659,26 @@ $("replay").addEventListener("click",()=>{animateScene();speak(combinedInstructi
 $("next").addEventListener("click",()=>changeStep(1));
 $("prev").addEventListener("click",()=>changeStep(-1));
 
+enableVoiceBtn.addEventListener("click",unlockVoice);
+
 $("voiceBtn").addEventListener("click",()=>{
- voiceOn=!voiceOn;
- $("voiceBtn").textContent=voiceOn?"Voice on":"Voice off";
- if(voiceOn){primeVoice();speak("Voice Director is on.")}else if(window.speechSynthesis)speechSynthesis.cancel();
+ if(!voiceUnlocked){
+  voiceGate.style.display="block";
+  voiceStatus.textContent="Tap Enable + test voice first.";
+  return;
+ }
+
+ if(voiceOn){
+  voiceOn=false;
+  voiceBtn.textContent="Voice off";
+  if(window.speechSynthesis)speechSynthesis.cancel();
+  voiceStatus.textContent="Voice Director muted.";
+ }else{
+  voiceOn=true;
+  voiceBtn.textContent="Voice on";
+  voiceGate.style.display="block";
+  testVoice();
+ }
 });
 
 $("ghostBtn").addEventListener("click",e=>{
@@ -615,13 +710,15 @@ $("back").addEventListener("click",()=>{
  stopReadyWatcher();
  if(stream)stream.getTracks().forEach(t=>t.stop());
  if(window.speechSynthesis)speechSynthesis.cancel();
+ voiceGate.style.display="none";
  camera.style.display="none";intro.style.display="flex";
 });
 
 $("shutter").addEventListener("click",()=>speak("Capture control is not connected in this interaction prototype yet. Hold the pose while we validate the coaching flow."));
 
 if(window.speechSynthesis){
- speechSynthesis.onvoiceschanged=()=>pickVoice();
+ speechSynthesis.getVoices();
+ speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
 }
 setCue();
 </script>
